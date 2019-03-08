@@ -1,5 +1,5 @@
 jobs:
-- job: Pack / Import Solution
+- job: PackImportSolution
   pool:
     vmImage: 'vs2017-win2016'
   steps:
