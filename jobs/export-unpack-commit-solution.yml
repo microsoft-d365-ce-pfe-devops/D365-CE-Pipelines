@@ -8,9 +8,12 @@ jobs:
   - powershell: |
       Set-Location $($env:BuildSourcesDirectory)
       Write-Output "test" | Out-File "./new-file.txt"
-      git remote set-url origin "$env:BuildRepositoryUri".Replace(
+
+      $remoteUrl = "$env:BuildRepositoryUri".Replace(
         "https://",
         "https://""$($env:BuildRequestedForEmail)"":$($env:GitHubCredentialsPassword)@")
+      Write-Output $remoteUrl
+      git remote set-url origin $remoteUrl
       git config user.email $env:BuildRequestedForEmail
       git config user.name $env:BuildRequestedFor
       git checkout master
