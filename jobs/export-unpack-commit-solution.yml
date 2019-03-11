@@ -6,18 +6,26 @@ jobs:
   # - template: ../steps/install-core-tools.yml
 
   - powershell: |
-      Set-Location $($env:BuildSourcesDirectory)
-      Write-Output "test" | Out-File "./new-file.txt"
-      git config user.email $env:BuildRequestedForEmail
-      git config user.name $env:BuildRequestedFor
-      git checkout master
-      git add *
-      git commit -m "Created a sample file"
-      git push -f
+      Write-Output $env:BuildRepositoryUri
     env:
-      BuildSourcesDirectory: $(Build.SourcesDirectory)
-      BuildRequestedFor: $(Build.RequestedFor)
-      BuildRequestedForEmail: $(Build.RequestedForEmail)
+      BuildRepositoryUri: $(Build.Repository.Uri)
+    displayName: Display build repository URI
+
+  # - powershell: |
+  #     Set-Location $($env:BuildSourcesDirectory)
+  #     Write-Output "test" | Out-File "./new-file.txt"
+  #     git remote set-url origin "https://$($env:BuildRequestedForEmail):$($env:GitHubCredentialsPassword)@
+  #     git config user.email $env:BuildRequestedForEmail
+  #     git config user.name $env:BuildRequestedFor
+  #     git checkout master
+  #     git add *
+  #     git commit -m "Created a sample file"
+  #     git push -f
+  #   env:
+  #     BuildSourcesDirectory: $(Build.SourcesDirectory)
+  #     BuildRequestedFor: $(Build.RequestedFor)
+  #     BuildRequestedForEmail: $(Build.RequestedForEmail)
+  #     GitHubCredentialsPassword: $(GitHubCredentials.Password)
 
   # - powershell: |
   #     git clone https://ContosoUniversity:$($env:DevOpsRepoToken)@dev.azure.com/MicrosoftIpDevOps/ContosoUniversity/_git/$env:SolutionName
