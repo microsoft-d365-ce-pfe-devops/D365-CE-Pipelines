@@ -6,8 +6,8 @@ jobs:
   # - template: ../steps/install-core-tools.yml
 
   - powershell: |
-      "test" > "$(BuildSourcesDirectory)/new-file.txt"
       Set-Location $(BuildSourcesDirectory)
+      Write-Output "test" | Out-File "//new-file.txt"
       git add *
       git commit -m "Created a sample file"
       git push
