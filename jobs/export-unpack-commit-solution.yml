@@ -13,7 +13,7 @@ jobs:
       git checkout master
       git add *
       git commit -m "Created a sample file"
-      git push
+      git push -f
     env:
       BuildSourcesDirectory: $(Build.SourcesDirectory)
       BuildRequestedFor: $(Build.RequestedFor)
