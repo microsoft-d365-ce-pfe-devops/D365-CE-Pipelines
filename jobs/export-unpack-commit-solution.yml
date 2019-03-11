@@ -9,9 +9,9 @@ jobs:
       Set-Location $($env:BuildSourcesDirectory)
       Write-Output "test" | Out-File "./new-file.txt"
 
-      $remoteUrl = "$env:BuildRepositoryUri".Replace(
+      $remoteUrl = "$env:BuildRepositoryUri.git".Replace(
         "https://",
-        "https://""$($env:BuildRequestedForEmail)"":$($env:GitHubCredentialsPassword)@")
+        "https://$([uri]::EscapeDataString($env:BuildRequestedForEmail)):$([uri]::EscapeDataString($env:GitHubCredentialsPassword))@")
       Write-Output $remoteUrl
       git remote set-url origin $remoteUrl
       git config user.email $env:BuildRequestedForEmail
