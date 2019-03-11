@@ -6,13 +6,17 @@ jobs:
   # - template: ../steps/install-core-tools.yml
 
   - powershell: |
-      Set-Location $($env:SRC_DIR)
+      Set-Location $($env:BuildSourcesDirectory)
       Write-Output "test" | Out-File "./new-file.txt"
+      git config user.email $env:BuildRequestedForEmail
+      git config user.name $env:BuildRequestedFor
       git add *
       git commit -m "Created a sample file"
       git push
     env:
-      SRC_DIR: $(Build.SourcesDirectory)
+      BuildSourcesDirectory: $(Build.SourcesDirectory)
+      BuildRequestedFor: $(Build.RequestedFor)
+      BuildRequestedForEmail: $(Build.RequestedForEmail)
 
   # - powershell: |
   #     git clone https://ContosoUniversity:$($env:DevOpsRepoToken)@dev.azure.com/MicrosoftIpDevOps/ContosoUniversity/_git/$env:SolutionName
