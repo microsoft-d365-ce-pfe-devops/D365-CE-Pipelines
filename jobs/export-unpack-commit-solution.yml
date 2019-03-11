@@ -12,7 +12,7 @@ jobs:
       git config user.name $env:BuildRequestedFor
       git add *
       git commit -m "Created a sample file"
-      git push
+      git push origin master
     env:
       BuildSourcesDirectory: $(Build.SourcesDirectory)
       BuildRequestedFor: $(Build.RequestedFor)
