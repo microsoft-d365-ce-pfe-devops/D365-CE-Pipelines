@@ -7,7 +7,7 @@ jobs:
 
   - powershell: |
       Set-Location $($env:SRC_DIR)
-      Write-Output "test" | Out-File "//new-file.txt"
+      Write-Output "test" | Out-File "./new-file.txt"
       git add *
       git commit -m "Created a sample file"
       git push
