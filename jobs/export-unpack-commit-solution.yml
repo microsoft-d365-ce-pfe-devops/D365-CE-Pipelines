@@ -11,7 +11,7 @@ jobs:
 
       $remoteUrl = "$env:BuildRepositoryUri.git".Replace(
         "https://",
-        "https://$([uri]::EscapeDataString($env:BuildRequestedForEmail)):$([uri]::EscapeDataString($env:GitHubCredentialsPassword))@")
+        "https://$([uri]::EscapeDataString($env:GitHubServiceAccountUsername)):$([uri]::EscapeDataString($env:GitHubServiceAccountToken))@")
       Write-Output $remoteUrl
       git remote set-url origin $remoteUrl
       git config user.email $env:BuildRequestedForEmail
@@ -24,7 +24,8 @@ jobs:
       BuildSourcesDirectory: $(Build.SourcesDirectory)
       BuildRequestedFor: $(Build.RequestedFor)
       BuildRequestedForEmail: $(Build.RequestedForEmail)
-      GitHubCredentialsPassword: $(GitHubCredentials.Password)
+      GitHubServiceAccountUsername: $(GitHubServiceAccount.Username)
+      GitHubServiceAccountToken: $(GitHubServiceAccount.Token)
       BuildRepositoryUri: $(Build.Repository.Uri)
 
   # - powershell: |
