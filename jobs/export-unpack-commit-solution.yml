@@ -23,6 +23,7 @@ jobs:
       GitHubServiceAccountToken: $(GitHubServiceAccount.Token)
       BuildRepositoryUri: $(Build.Repository.Uri)
       BuildSourceBranchName: $(Build.SourceBranchName)
+    displayName: "Switch git credentials"
 
   - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
     displayName: 'Install Microsoft.Xrm.Data.PowerShell'
@@ -31,7 +32,7 @@ jobs:
       $connection = Get-CrmConnection `
         -ConnectionString `
           ("AuthType = Office365;" + `
-          "Username = $env:DynamicsServiceAccountUserName;" + `
+          "Username = $env:DynamicsServiceAccountUsername;" + `
           "Password = $env:DynamicsServiceAccountPassword;" + `
           "Url = https://$env:EnvironmentName.crm.dynamics.com")
 
@@ -46,7 +47,7 @@ jobs:
         -SolutionZipFileName "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip" `
         -Managed
     env:
-      DynamicsServiceAccountUserName: $(DynamicsServiceAccount.UserName)
+      DynamicsServiceAccountUsername: $(DynamicsServiceAccount.Username)
       DynamicsServiceAccountPassword: $(DynamicsServiceAccount.Password)
       EnvironmentName: $(Environment.Name)
       SolutionName: $(Solution.Name)
