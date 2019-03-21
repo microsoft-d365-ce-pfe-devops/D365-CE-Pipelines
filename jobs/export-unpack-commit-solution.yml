@@ -4,89 +4,83 @@ jobs:
     vmImage: 'vs2017-win2016'
   steps:
   - powershell: |
-      Write-Output "test" | Out-File "$env:AgentWorkFolder\new-file.txt"
-    env: 
+      Set-Location $($env:BuildSourcesDirectory)
+      
+      $username = [uri]::EscapeDataString($env:GitHubServiceAccountUsername)
+      $token = [uri]::EscapeDataString($env:GitHubServiceAccountToken)
+      $remoteUrl = "$env:BuildRepositoryUri.git".Replace(
+        "https://",
+        "https://$($username):$($token)@")
+      git remote set-url origin $remoteUrl
+
+      git config user.email $env:GitHubServiceAccountUsername
+      git config user.name "DevOps Service"
+
+      git checkout $env:BuildSourceBranchName
+    env:
+      BuildSourcesDirectory: $(Build.SourcesDirectory)
+      GitHubServiceAccountUsername: $(GitHubServiceAccount.Username)
+      GitHubServiceAccountToken: $(GitHubServiceAccount.Token)
+      BuildRepositoryUri: $(Build.Repository.Uri)
+      BuildSourceBranchName: $(Build.SourceBranchName)
+    displayName: "Switch git credentials"
+
+  - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
+    displayName: 'Install Microsoft.Xrm.Data.PowerShell'
+
+  - powershell: |
+      $connection = Get-CrmConnection `
+        -ConnectionString `
+          ("AuthType = Office365;" + `
+          "Username = $env:DynamicsServiceAccountUsername;" + `
+          "Password = $env:DynamicsServiceAccountPassword;" + `
+          "Url = https://$env:EnvironmentName.crm.dynamics.com")
+
+      Export-CrmSolution `
+        -conn $connection `
+        -SolutionName $env:SolutionName `
+        -SolutionZipFileName "$env:AgentWorkFolder\$env:SolutionName.zip"
+      
+      Export-CrmSolution `
+        -conn $connection `
+        -SolutionName $env:SolutionName `
+        -SolutionZipFileName "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip" `
+        -Managed
+    env:
+      DynamicsServiceAccountUsername: $(DynamicsServiceAccount.Username)
+      DynamicsServiceAccountPassword: $(DynamicsServiceAccount.Password)
+      EnvironmentName: $(Environment.Name)
+      SolutionName: $(Solution.Name)
       AgentWorkFolder: $(Agent.WorkFolder)
-    displayName: "Creating a stupid file"
+    displayName: 'Export solution'
 
-  # - powershell: |
-  #     Set-Location $($env:BuildSourcesDirectory)
-      
-  #     $username = [uri]::EscapeDataString($env:GitHubServiceAccountUsername)
-  #     $token = [uri]::EscapeDataString($env:GitHubServiceAccountToken)
-  #     $remoteUrl = "$env:BuildRepositoryUri.git".Replace(
-  #       "https://",
-  #       "https://$($username):$($token)@")
-  #     git remote set-url origin $remoteUrl
+  - powershell: Remove-Item $env:SolutionPath -Recurse -Verbose
+    env:
+      SolutionPath: $(Solution.Path)
+    displayName: 'Clear existing unpacked solution'
 
-  #     git config user.email $env:GitHubServiceAccountUsername
-  #     git config user.name "DevOps Service"
+  - template: ../steps/install-core-tools.yml
 
-  #     git checkout $env:BuildSourceBranchName
-  #   env:
-  #     BuildSourcesDirectory: $(Build.SourcesDirectory)
-  #     GitHubServiceAccountUsername: $(GitHubServiceAccount.Username)
-  #     GitHubServiceAccountToken: $(GitHubServiceAccount.Token)
-  #     BuildRepositoryUri: $(Build.Repository.Uri)
-  #     BuildSourceBranchName: $(Build.SourceBranchName)
-  #   displayName: "Switch git credentials"
+  - powershell: |
+      Start-Process $env:AgentWorkFolder/tools/CoreTools/SolutionPackager.exe `
+        -ArgumentList `
+          "/action: Extract", `
+          "/zipfile: $env:AgentWorkFolder/$env:SolutionName.zip", `
+          "/folder: $env:SolutionPath", `
+          "/packagetype: Both" `
+        -Wait `
+        -NoNewWindow
+    env:
+      AgentWorkFolder: $(Agent.WorkFolder)
+      SolutionName: $(Solution.Name)
+      SolutionPath: $(Solution.Path)
+    displayName: 'Unpack solution'
 
-  # - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
-  #   displayName: 'Install Microsoft.Xrm.Data.PowerShell'
-
-  # - powershell: |
-  #     $connection = Get-CrmConnection `
-  #       -ConnectionString `
-  #         ("AuthType = Office365;" + `
-  #         "Username = $env:DynamicsServiceAccountUsername;" + `
-  #         "Password = $env:DynamicsServiceAccountPassword;" + `
-  #         "Url = https://$env:EnvironmentName.crm.dynamics.com")
-
-  #     Export-CrmSolution `
-  #       -conn $connection `
-  #       -SolutionName $env:SolutionName `
-  #       -SolutionZipFileName "$env:SolutionName.zip"
-      
-  #     Export-CrmSolution `
-  #       -conn $connection `
-  #       -SolutionName $env:SolutionName `
-  #       -SolutionZipFileName "$($env:SolutionName)_managed.zip" `
-  #       -Managed
-  #   env:
-  #     DynamicsServiceAccountUsername: $(DynamicsServiceAccount.Username)
-  #     DynamicsServiceAccountPassword: $(DynamicsServiceAccount.Password)
-  #     EnvironmentName: $(Environment.Name)
-  #     SolutionName: $(Solution.Name)
-  #     # AgentWorkFolder: $(Agent.WorkFolder)
-  #   displayName: 'Export solution'
-
-  # - powershell: Remove-Item $env:SolutionName/solution -Recurse -Verbose
-  #   env:
-  #     SolutionName: $(Solution.Name)
-  #   displayName: 'Clear existing unpacked solution'
-
-  # - template: ../steps/install-core-tools.yml
-
-  # - powershell: |
-  #     Start-Process tools/CoreTools/SolutionPackager.exe `
-  #       -ArgumentList `
-  #         "/action: Extract", `
-  #         "/zipfile: $env:SolutionName.zip", `
-  #         "/folder: $env:SolutionName/solution", `
-  #         "/packagetype: Both" `
-  #       -Wait `
-  #       -NoNewWindow
-  #   env:
-  #     # AgentWorkFolder: $(Agent.WorkFolder)
-  #     SolutionName: $(Solution.Name)
-  #   displayName: 'Unpack solution'
-
-  # - powershell: |
-  #     git add $env:BuildSourcesDirectory/*
-  #     git commit --author="$env:BuildRequestedFor <$env:BuildRequestedForEmail>" -m "Solution modification during build $($env:Build_BuildNumber)"
-  #     git push --set-upstream origin master
-  #   env:
-  #     BuildSourcesDirectory: $(Build.SourcesDirectory)
-  #     BuildRequestedForEmail: $(Build.RequestedForEmail)
-  #     BuildRequestedFor: $(Build.RequestedFor)
-  #   displayName: 'Commit solution changes'
+  - powershell: |
+      git add *
+      git commit --author="$env:BuildRequestedFor <$env:BuildRequestedForEmail>" -m "Solution modification during build $($env:Build_BuildNumber)"
+      git push --set-upstream origin master
+    env:
+      BuildRequestedForEmail: $(Build.RequestedForEmail)
+      BuildRequestedFor: $(Build.RequestedFor)
+    displayName: 'Commit solution changes'

@@ -1,17 +1,21 @@
 steps:
-  - script: md tools
+  - script: md $(Agent.WorkFolder)\tools
     displayName: 'Create tools directory'
 
   - powershell: |
       Invoke-WebRequest `
       -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe `
-      -OutFile tools\\nuget.exe
+      -OutFile $env:AgentWorkFolder\\tools\\nuget.exe
+    env:
+      AgentWorkFolder: $(Agent.WorkFolder)
     displayName: 'Download nuget.exe'
 
   - powershell: |
-      tools\\nuget.exe install Microsoft.CrmSdk.CoreTools -O tools
-      md "tools\\CoreTools"
-      $coreToolsFolder = Get-ChildItem tools | Where-Object {$_.Name -match 'Microsoft.CrmSdk.CoreTools.'}
-      move "tools\\$coreToolsFolder\\content\\bin\\coretools\\*.*" "tools\\CoreTools"
-      Remove-Item "tools\\$coreToolsFolder" -Force -Recurse
+      $env:AgentWorkFolder\\tools\\nuget.exe install Microsoft.CrmSdk.CoreTools -O tools
+      md "$env:AgentWorkFolder\\tools\\CoreTools"
+      $coreToolsFolder = Get-ChildItem $env:AgentWorkFolder\\tools | Where-Object {$_.Name -match 'Microsoft.CrmSdk.CoreTools.'}
+      move "$env:AgentWorkFolder\\tools\\$coreToolsFolder\\content\\bin\\coretools\\*.*" "$env:AgentWorkFolder\\tools\\CoreTools"
+      Remove-Item "$env:AgentWorkFolder\\tools\\$coreToolsFolder" -Force -Recurse
+    env:
+      AgentWorkFolder: $(Agent.WorkFolder)
     displayName: 'Install CoreTools'
