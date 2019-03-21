@@ -6,13 +6,12 @@ steps:
       Invoke-WebRequest `
         -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe `
         -OutFile $env:AgentWorkFolder\tools\nuget.exe
-      
-      Set-Alias nuget $env:AgentWorkFolder\tools\nuget.exe
     env:
       AgentWorkFolder: $(Agent.WorkFolder)
     displayName: 'Download nuget.exe'
 
   - powershell: |
+      Set-Alias nuget $env:AgentWorkFolder\tools\nuget.exe
       nuget install Microsoft.CrmSdk.CoreTools -O $env:AgentWorkFolder\tools
       md "$env:AgentWorkFolder\tools\CoreTools"
       $coreToolsFolder = Get-ChildItem $env:AgentWorkFolder\tools | Where-Object {$_.Name -match 'Microsoft.CrmSdk.CoreTools.'}
