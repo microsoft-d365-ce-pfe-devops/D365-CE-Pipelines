@@ -3,93 +3,87 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  # - template: ../steps/install-core-tools.yml
-
   - powershell: |
       Set-Location $($env:BuildSourcesDirectory)
-      Write-Output "test" | Out-File "./new-file.txt"
-
+      
+      $username = [uri]::EscapeDataString($env:GitHubServiceAccountUsername)
+      $token = [uri]::EscapeDataString($env:GitHubServiceAccountToken)
       $remoteUrl = "$env:BuildRepositoryUri.git".Replace(
         "https://",
-        "https://$([uri]::EscapeDataString($env:GitHubServiceAccountUsername)):$([uri]::EscapeDataString($env:GitHubServiceAccountToken))@")
-      Write-Output $remoteUrl
+        "https://$($username):$($token)@")
       git remote set-url origin $remoteUrl
-      git config user.email $env:BuildRequestedForEmail
-      git config user.name $env:BuildRequestedFor
-      git checkout master
-      git add *
-      git commit -m "Created a sample file"
-      git push -f
+
+      # git config user.email $env:BuildRequestedForEmail
+      # git config user.name $env:BuildRequestedFor
+
+      git checkout $env:BuildSourceBranchName
     env:
       BuildSourcesDirectory: $(Build.SourcesDirectory)
-      BuildRequestedFor: $(Build.RequestedFor)
-      BuildRequestedForEmail: $(Build.RequestedForEmail)
       GitHubServiceAccountUsername: $(GitHubServiceAccount.Username)
       GitHubServiceAccountToken: $(GitHubServiceAccount.Token)
       BuildRepositoryUri: $(Build.Repository.Uri)
+      # BuildRequestedForEmail: $(Build.RequestedForEmail)
+      # BuildRequestedFor: $(Build.RequestedFor)
+      BuildSourceBranchName: $(Build.SourceBranchName)
 
-  # - powershell: |
-  #     git clone https://ContosoUniversity:$($env:DevOpsRepoToken)@dev.azure.com/MicrosoftIpDevOps/ContosoUniversity/_git/$env:SolutionName
-  #   env:
-  #     SolutionName: $(Solution.Name)
-  #     DevOpsRepoToken: $(DevOpsRepoToken)
-  #   displayName: 'Clone solution repository'
-
-  # - powershell: Remove-Item $env:SolutionName/solution -Recurse -Verbose
-  #   env:
-  #     SolutionName: $(Solution.Name)
-  #   displayName: 'Clear existing solution pack'
-
-  # - script: md temp
-  #   displayName: 'Create temp directory'
+  # - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
+  #   displayName: 'Install Microsoft.Xrm.Data.PowerShell'
 
   # - powershell: |
   #     $connection = Get-CrmConnection `
   #       -ConnectionString `
   #         ("AuthType = Office365;" + `
-  #         "Username = $env:ServiceAccountUserName;" + `
-  #         "Password = $env:ServiceAccountPassword;" + `
+  #         "Username = $env:DynamicsServiceAccountUserName;" + `
+  #         "Password = $env:DynamicsServiceAccountPassword;" + `
   #         "Url = https://$env:EnvironmentName.crm.dynamics.com")
 
   #     Export-CrmSolution `
   #       -conn $connection `
   #       -SolutionName $($env:SolutionName) `
-  #       -SolutionZipFileName "temp\$env:SolutionName.zip"
+  #       -SolutionZipFileName "$env:AgentWorkFolder\$env:SolutionName.zip"
       
   #     Export-CrmSolution `
   #       -conn $connection `
   #       -SolutionName $($env:SolutionName) `
-  #       -SolutionZipFileName "temp\$($env:SolutionName)_managed.zip" `
+  #       -SolutionZipFileName "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip" `
   #       -Managed
   #   env:
+  #     DynamicsServiceAccountUserName: $(DynamicsServiceAccount.UserName)
+  #     DynamicsServiceAccountPassword: $(DynamicsServiceAccount.Password)
   #     EnvironmentName: $(Environment.Name)
   #     SolutionName: $(Solution.Name)
-  #     ServiceAccountUserName: $(ServiceAccount.UserName)
-  #     ServiceAccountPassword: $(ServiceAccount.Password)
+  #     AgentWorkFolder: $(Agent.WorkFolder)
   #   displayName: 'Export solution'
+
+  # - powershell: Remove-Item $env:SolutionName/solution -Recurse -Verbose
+  #   env:
+  #     SolutionName: $(Solution.Name)
+  #   displayName: 'Clear existing unpacked solution'
+
+  # - template: ../steps/install-core-tools.yml
 
   # - powershell: |
   #     Start-Process tools/CoreTools/SolutionPackager.exe `
   #       -ArgumentList `
   #         "/action: Extract", `
-  #         "/zipfile: temp/$env:SolutionName.zip", `
+  #         "/zipfile: $env:AgentWorkFolder/$env:SolutionName.zip", `
   #         "/folder: $env:SolutionName/solution", `
   #         "/packagetype: Both" `
   #       -Wait `
   #       -NoNewWindow
   #   env:
+  #     AgentWorkFolder: $(Agent.WorkFolder)
   #     SolutionName: $(Solution.Name)
   #   displayName: 'Unpack solution'
 
-  # - powershell: |
-  #     Set-Location $env:SolutionName
-  #     git config user.email $env:ServiceAccountUserName
-  #     git config user.name $env:ServiceAccountFullName
-  #     git add *
-  #     git commit -m "Update from build $($env:Build_BuildNumber)"
-  #     git push --set-upstream origin master
-  #   env:
-  #     SolutionName: $(Solution.Name)
-  #     ServiceAccountUserName: $(ServiceAccount.UserName)
-  #     ServiceAccountFullName: $(ServiceAccount.FullName)
-  #   displayName: 'Commit solution changes'
+  - powershell: |
+      Write-Output "test" | Out-File new-file.txt
+      # git add $env:SolutionName/*
+      git add new-file.txt
+      git commit --autor="$env:BuildRequestedFor $env:BuildRequestedForEmail" -m "Solution modification during build $($env:Build_BuildNumber)"
+      git push --set-upstream origin master
+    env:
+      SolutionName: $(Solution.Name)
+      BuildRequestedForEmail: $(Build.RequestedForEmail)
+      BuildRequestedFor: $(Build.RequestedFor)
+    displayName: 'Commit solution changes'
