@@ -13,8 +13,8 @@ jobs:
         "https://$($username):$($token)@")
       git remote set-url origin $remoteUrl
 
-      # git config user.email $env:BuildRequestedForEmail
-      # git config user.name $env:BuildRequestedFor
+      git config user.email $env:GitHubServiceAccountUsername
+      git config user.name "DevOps Service"
 
       git checkout $env:BuildSourceBranchName
     env:
