@@ -38,20 +38,20 @@ jobs:
 
       Export-CrmSolution `
         -conn $connection `
-        -SolutionName $($env:SolutionName) `
-        -SolutionZipFileName "$env:AgentWorkFolder\$env:SolutionName.zip"
+        -SolutionName $env:SolutionName `
+        -SolutionZipFileName "$env:SolutionName.zip"
       
       Export-CrmSolution `
         -conn $connection `
-        -SolutionName $($env:SolutionName) `
-        -SolutionZipFileName "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip" `
+        -SolutionName $env:SolutionName `
+        -SolutionZipFileName "$($env:SolutionName)_managed.zip" `
         -Managed
     env:
       DynamicsServiceAccountUsername: $(DynamicsServiceAccount.Username)
       DynamicsServiceAccountPassword: $(DynamicsServiceAccount.Password)
       EnvironmentName: $(Environment.Name)
       SolutionName: $(Solution.Name)
-      AgentWorkFolder: $(Agent.WorkFolder)
+      # AgentWorkFolder: $(Agent.WorkFolder)
     displayName: 'Export solution'
 
   - powershell: Remove-Item $env:SolutionName/solution -Recurse -Verbose
@@ -65,23 +65,23 @@ jobs:
       Start-Process tools/CoreTools/SolutionPackager.exe `
         -ArgumentList `
           "/action: Extract", `
-          "/zipfile: $env:AgentWorkFolder/$env:SolutionName.zip", `
+          "/zipfile: $env:SolutionName.zip", `
           "/folder: $env:SolutionName/solution", `
           "/packagetype: Both" `
         -Wait `
         -NoNewWindow
     env:
-      AgentWorkFolder: $(Agent.WorkFolder)
+      # AgentWorkFolder: $(Agent.WorkFolder)
       SolutionName: $(Solution.Name)
     displayName: 'Unpack solution'
 
   - powershell: |
       Write-Output "test" | Out-File new-file.txt
-      git add $env:SolutionName/*
+      git add $env:BuildSourcesDirectory/*
       git commit --author="$env:BuildRequestedFor <$env:BuildRequestedForEmail>" -m "Solution modification during build $($env:Build_BuildNumber)"
       git push --set-upstream origin master
     env:
-      SolutionName: $(Solution.Name)
+      BuildSourcesDirectory: $(Build.SourcesDirectory)
       BuildRequestedForEmail: $(Build.RequestedForEmail)
       BuildRequestedFor: $(Build.RequestedFor)
     displayName: 'Commit solution changes'
