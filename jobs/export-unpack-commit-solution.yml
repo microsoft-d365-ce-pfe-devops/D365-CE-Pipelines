@@ -39,12 +39,12 @@ jobs:
       Export-CrmSolution `
         -conn $connection `
         -SolutionName $env:SolutionName `
-        -SolutionZipFileName (Resolve-Path "$env:AgentWorkFolder\$env:SolutionName.zip")
+        -SolutionZipFileName (Resolve-Path "$env:AgentWorkFolder\$env:SolutionName.zip" -Relative)
       
       Export-CrmSolution `
         -conn $connection `
         -SolutionName $env:SolutionName `
-        -SolutionZipFileName (Resolve-Path "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip")
+        -SolutionZipFileName (Resolve-Path "$env:AgentWorkFolder\$($env:SolutionName)_managed.zip" -Relative)
         -Managed
     env:
       DynamicsServiceAccountUsername: $(DynamicsServiceAccount.Username)
