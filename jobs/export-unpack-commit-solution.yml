@@ -80,7 +80,7 @@ jobs:
       Write-Output "test" | Out-File new-file.txt
       # git add $env:SolutionName/*
       git add new-file.txt
-      git commit --autor="$env:BuildRequestedFor $env:BuildRequestedForEmail" -m "Solution modification during build $($env:Build_BuildNumber)"
+      git commit --author="$env:BuildRequestedFor $env:BuildRequestedForEmail" -m "Solution modification during build $($env:Build_BuildNumber)"
       git push --set-upstream origin master
     env:
       SolutionName: $(Solution.Name)
