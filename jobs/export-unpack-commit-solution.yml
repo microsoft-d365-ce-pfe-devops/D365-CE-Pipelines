@@ -5,7 +5,7 @@ jobs:
   steps:
   - powershell: |
       gpg --help
-    displayName: Run "GPG" command
+    displayName: Run GPG help
   # - powershell: |
   #     Set-Location $($env:BuildSourcesDirectory)
       
