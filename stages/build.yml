@@ -1,0 +1,47 @@
+stages:
+- stage: Build
+  jobs:
+    - job:
+      displayName: "Pack Solution from repository"
+    
+      pool:
+        vmImage: 'vs2017-win2016'
+      steps:
+      - script: md tools
+        displayName: 'Create tools directory'
+
+      - powershell: |
+          Invoke-WebRequest `
+            -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe `
+            -OutFile tools\nuget.exe
+        displayName: 'Download nuget.exe'
+
+      - powershell: |
+          tools\\nuget.exe install Microsoft.CrmSdk.CoreTools -O tools
+          md "tools\\CoreTools"
+          $coreToolsFolder = Get-ChildItem tools | Where-Object {$_.Name -match 'Microsoft.CrmSdk.CoreTools.'}
+          move "tools\\$coreToolsFolder\\content\\bin\\coretools\\*.*" "tools\\CoreTools"
+          Remove-Item "tools\\$coreToolsFolder" -Force -Recurse
+        env:
+          AgentWorkFolder: $(Agent.WorkFolder)
+        displayName: 'Install CoreTools'
+
+      - powershell: |
+          Start-Process tools/CoreTools/SolutionPackager.exe `
+          -ArgumentList `
+            "/action: Pack", `
+            "/zipfile: $(Build.ArtifactStagingDirectory)\packedSolution\$env:SolutionName.zip", `
+            "/folder: $env:SolutionPath", `
+            "/packagetype: Both" `
+          -Wait `
+          -NoNewWindow
+        env:
+          SolutionPath: $(solution.path)
+          SolutionName: $(solution.name)
+        displayName: 'Solution Packager: pack solution'
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: drop
+        displayName: 'Publish build artifacts'
