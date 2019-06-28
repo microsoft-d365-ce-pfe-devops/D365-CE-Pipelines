@@ -33,9 +33,19 @@ stages:
             -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
             -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
             -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerappschecker.clientsecret)')
+          displayName: 'Invoke PowerApps Checker'
+
+      - script: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
+        displayName: 'Create folder for unzipped results'
+
+      - task: ExtractFiles@1
+        inputs:
+          archiveFilePatterns: '$(Common.TestResultsDirectory)\powerapps-checker\*.zip'
+          destinationFolder: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
+        displayName: 'Extract results to folder'
       
       - task: PublishBuildArtifacts@1
         inputs:
-          pathtoPublish: '$(Common.TestResultsDirectory)\powerapps-checker'
+          pathtoPublish: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
           artifactName: CodeAnalysisLogs
         displayName: 'Publish PowerApps Checker report artifacts'
