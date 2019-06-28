@@ -33,7 +33,7 @@ stages:
             -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
             -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
             -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerappschecker.clientsecret)')
-          displayName: 'Invoke PowerApps Checker'
+        displayName: 'Invoke PowerApps Checker'
 
       - script: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
         displayName: 'Create folder for unzipped results'
