@@ -1,7 +1,7 @@
 stages:
 - stage: Test
 
-  dependsOn: Test
+  dependsOn: Build
   condition: succeeded('Build')
 
   jobs:
