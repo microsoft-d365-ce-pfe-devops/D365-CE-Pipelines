@@ -28,7 +28,7 @@ stages:
             -ClientApplicationId $(powerappschecker.clientid) `
             -TenantId $(azure.tenantid) `
             -Ruleset $rulesets `
-            -FileUnderAnalysis '$(System.ArtifactsDirectory)\$(solution.name)_managed.zip' `
+            -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
             -OutputDirectory $(Build.ArtifactStagingDirectory) `
             -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerappschecker.clientsecret)')
       
