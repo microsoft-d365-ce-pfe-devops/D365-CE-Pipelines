@@ -1,0 +1,39 @@
+stages:
+- stage: Test
+
+  dependsOn: Test
+  condition: succeeded('Build')
+
+  jobs:
+    - job:
+      displayName: 'Run PowerApps Checker'
+
+      pool: 'vs2017-win2016'
+
+      steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'drop'
+          downloadPath: '$(System.ArtifactsDirectory)'
+        
+      - powershell: Install-Module -Name Microsoft.PowerApps.Checker.PowerShell -Scope CurrentUser -Force
+        displayName: 'Install Microsoft.PowerApps.Checker.PowerShell'
+      
+      - powershell: |
+          $rulesets = Get-PowerAppsCheckerRulesets -Geography $(azure.geography)
+          Invoke-PowerAppsChecker `
+            -Geography $(azure.geography) `
+            -ClientApplicationId $(powerappschecker.clientid) `
+            -TenantId $(azure.tenantid) `
+            -Ruleset $rulesets `
+            -FileUnderAnalysis '$(System.ArtifactsDirectory)\$(solution.name)_managed.zip' `
+            -OutputDirectory $(Build.ArtifactStagingDirectory) `
+            -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerappschecker.clientsecret)')
+      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: powerappschecker
+        displayName: 'Publish PowerApps Checker report artifacts'
