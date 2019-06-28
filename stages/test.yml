@@ -23,7 +23,7 @@ stages:
         displayName: 'Install Microsoft.PowerApps.Checker.PowerShell'
       
       - powershell: |
-          md '$(Build.ArtifactStagingDirectory)\powerappschecker'
+          md '$(Common.TestResultsDirectory)\powerapps-checker'
           $rulesets = Get-PowerAppsCheckerRulesets -Geography $(azure.geography)
           Invoke-PowerAppsChecker `
             -Geography $(azure.geography) `
@@ -31,11 +31,11 @@ stages:
             -TenantId $(azure.tenantid) `
             -Ruleset $rulesets `
             -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
-            -OutputDirectory '$(Build.ArtifactStagingDirectory)\powerappschecker' `
+            -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
             -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerappschecker.clientsecret)')
       
       - task: PublishBuildArtifacts@1
         inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)\powerappschecker'
-          artifactName: powerappschecker
+          pathtoPublish: '$(Common.TestResultsDirectory)\powerapps-checker'
+          artifactName: CodeAnalysisLogs
         displayName: 'Publish PowerApps Checker report artifacts'
