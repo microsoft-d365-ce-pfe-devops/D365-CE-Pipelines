@@ -1,8 +1,8 @@
 stages:
 - stage: Release
 
-  dependsOn: Build
-  condition: succeeded('Build')
+  dependsOn: Test
+  condition: succeeded('Test')
 
   jobs:
   - deployment: Deploy
