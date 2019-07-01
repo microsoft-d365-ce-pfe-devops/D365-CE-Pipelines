@@ -32,7 +32,7 @@ stages:
             -Ruleset $rulesets `
             -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
             -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
-            -ClientApplicationSecret $(powerAppsChecker.clientSecret)
+            -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
         displayName: 'Invoke PowerApps Checker'
 
       - powershell: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
