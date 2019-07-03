@@ -25,7 +25,7 @@ stages:
       - powershell: |
           md '$(Common.TestResultsDirectory)\powerapps-checker'
           $ruleset = [Microsoft.PowerApps.Checker.Client.Models.Ruleset]::new()
-          $ruleset.Id = [Guid]::Parse('$(powerAppsChecker.rulesetId)'')
+          $ruleset.Id = [Guid]::Parse('$(powerAppsChecker.rulesetId)')
           Invoke-PowerAppsChecker `
             -Geography $(azure.geography) `
             -ClientApplicationId $(powerAppsChecker.clientId) `
