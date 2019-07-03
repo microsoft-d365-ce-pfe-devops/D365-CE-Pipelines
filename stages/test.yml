@@ -24,11 +24,13 @@ stages:
       
       - powershell: |
           md '$(Common.TestResultsDirectory)\powerapps-checker'
+          $ruleset = [Microsoft.PowerApps.Checker.Client.Models.Ruleset]::new()
+          $ruleset.Id = [Guid]::Parse($(powerAppsChecker.rulesetId))
           Invoke-PowerAppsChecker `
             -Geography $(azure.geography) `
             -ClientApplicationId $(powerAppsChecker.clientId) `
             -TenantId $(azure.tenantId) `
-            -Ruleset $(powerAppsChecker.rulesetId) `
+            -Ruleset $ruleset `
             -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
             -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
             -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
