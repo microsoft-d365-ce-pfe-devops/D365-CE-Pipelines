@@ -24,8 +24,7 @@ stages:
       
       - powershell: |
           md '$(Common.TestResultsDirectory)\powerapps-checker'
-          
-          Add-Type -AssemblyName Microsoft.PowerApps.Checker.Client
+
           $ruleset = New-Object Microsoft.PowerApps.Checker.Client.Models.Ruleset
           $ruleset.Id = [Guid]::Parse('$(powerAppsChecker.rulesetId)')
 
