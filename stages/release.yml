@@ -33,14 +33,13 @@ stages:
                   ("AuthType = Office365;" + `
                   "Username = $env:ServiceAccountUpn;" + `
                   "Password = $env:ServiceAccountPassword;" + `
-                  "Url = https://$env:EnvironmentName.crm.dynamics.com")
+                  "Url = https://$env:ENVIRONMENT_NAME.crm.dynamics.com")
 
               Import-CrmSolutionAsync `
                 -BlockUntilImportComplete `
                 -conn $connection `
                 -SolutionFilePath $(System.ArtifactsDirectory)\drop\packedSolution\$($env:SolutionName)_managed.zip
             env:
-              EnvironmentName: $(environment.name)
               SolutionName: $(solution.name)
               ServiceAccountUpn: $(serviceAccount.upn)
               ServiceAccountPassword: $(serviceAccount.password)
