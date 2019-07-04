@@ -7,6 +7,13 @@ stages:
       pool:
         vmImage: 'vs2017-win2016'
       steps:
+      - powershell: |
+          Write-Host `
+            ("AuthType = Office365;" + `
+            "Username = $env:SERVICEACCOUNT_UPN;" + `
+            "Password = $env:SERVICEACCOUNT_PASSWORD;" + `
+            "Url = https://$env:ENVIRONMENT_NAME.crm.dynamics.com")
+      
       - script: md tools
         displayName: 'Create tools directory'
 
