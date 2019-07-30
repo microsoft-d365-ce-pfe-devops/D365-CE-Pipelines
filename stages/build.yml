@@ -22,22 +22,17 @@ stages:
           $coreToolsFolder = Get-ChildItem tools | Where-Object {$_.Name -match 'Microsoft.CrmSdk.CoreTools.'}
           move "tools\\$coreToolsFolder\\content\\bin\\coretools\\*.*" "tools\\CoreTools"
           Remove-Item "tools\\$coreToolsFolder" -Force -Recurse
-        env:
-          AgentWorkFolder: $(Agent.WorkFolder)
         displayName: 'Install CoreTools'
 
       - powershell: |
           Start-Process tools/CoreTools/SolutionPackager.exe `
           -ArgumentList `
             "/action: Pack", `
-            "/zipfile: $(Build.ArtifactStagingDirectory)\packedSolution\$env:SolutionName.zip", `
-            "/folder: $env:SolutionPath", `
+            "/zipfile: $(build.artifactStagingDirectory)\packedSolution\$(solution.name).zip", `
+            "/folder: $(solution.path)", `
             "/packagetype: Both" `
           -Wait `
           -NoNewWindow
-        env:
-          SolutionPath: $(solution.path)
-          SolutionName: $(solution.name)
         displayName: 'Solution Packager: pack solution'
       
       - task: PublishBuildArtifacts@1

@@ -30,21 +30,19 @@ stages:
           - powershell: |
               Write-Host `
                 ("AuthType = Office365;" + `
-                  "Username = $env:SERVICEACCOUNT_UPN;" + `
-                  "Password = $env:SERVICEACCOUNT_PASSWORD;" + `
-                  "Url = https://$env:ENVIRONMENT_NAME.crm.dynamics.com")
+                  "Username = $(serviceAccount.upn);" + `
+                  "Password = $(serviceAccount.password);" + `
+                  "Url = https://$(environment.name).crm.dynamics.com")
               
               $connection = Get-CrmConnection `
                 -ConnectionString `
                   ("AuthType = Office365;" + `
-                  "Username = $env:SERVICEACCOUNT_UPN;" + `
-                  "Password = $env:SERVICEACCOUNT_PASSWORD;" + `
-                  "Url = https://$env:ENVIRONMENT_NAME.crm.dynamics.com")
+                  "Username = $(serviceAccount.upn);" + `
+                  "Password = $(serviceAccount.password);" + `
+                  "Url = https://$(environment.name).crm.dynamics.com")
 
               Import-CrmSolutionAsync `
                 -BlockUntilImportComplete `
                 -conn $connection `
-                -SolutionFilePath $(System.ArtifactsDirectory)\drop\packedSolution\$($env:SOLUTION_NAME)_managed.zip
-            env:
-              SERVICEACCOUNT_PASSWORD: $(serviceAccount.password)
+                -SolutionFilePath $(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip
             displayName: 'Import solution'
