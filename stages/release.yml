@@ -32,14 +32,14 @@ stages:
                 ("AuthType = Office365;" + `
                   "Username = $(serviceAccount.upn);" + `
                   "Password = $(serviceAccount.password);" + `
-                  "Url = https://$(environment.name).crm.dynamics.com")
+                  "Url = https://$(environment.uniqueName).crm.dynamics.com")
               
               $connection = Get-CrmConnection `
                 -ConnectionString `
                   ("AuthType = Office365;" + `
                   "Username = $(serviceAccount.upn);" + `
                   "Password = $(serviceAccount.password);" + `
-                  "Url = https://$(environment.name).crm.dynamics.com")
+                  "Url = https://$(environment.uniqueName).crm.dynamics.com")
 
               Import-CrmSolutionAsync `
                 -BlockUntilImportComplete `
