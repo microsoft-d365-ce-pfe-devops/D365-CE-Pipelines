@@ -39,20 +39,34 @@ stages:
           -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
 
         $issueSummary = $results.IssueSummary
-        Write-Host $issueSummary
+        If(
+              $issueSummary.CriticalIssueCount -gt 0
+          -or $issueSummary.HighIssueCount -gt 0
+          -or $issueSummary.MediumIssueCount -gt 0
+          -or $issueSummary.LowIssueCount -gt 0
+        ) {
+          Write-Host  "##vso[task.LogIssue type=error;]PowerApps Checker returned results that passed the allowable threshold. Please address these issues to allow the release stage."
+          Write-Host  "##vso[task.LogIssue type=error;]$issueSummary"
+          exit 1
+        } Else {
+          Write-Host "Issue Summary:\n$issueSummary"
+        }
       displayName: 'Invoke PowerApps Checker'
 
     - powershell: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
+      condition: always()
       displayName: 'Create folder for unzipped results'
 
     - task: ExtractFiles@1
       inputs:
         archiveFilePatterns: '$(Common.TestResultsDirectory)\powerapps-checker\*.zip'
         destinationFolder: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
+      condition: always()
       displayName: 'Extract results to folder'
 
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
         artifactName: CodeAnalysisLogs
+      condition: always()
       displayName: 'Publish PowerApps Checker report artifacts'
