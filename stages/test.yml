@@ -18,10 +18,10 @@ stages:
         downloadType: 'single'
         artifactName: 'drop'
         downloadPath: '$(System.ArtifactsDirectory)'
-      
+
     - powershell: Install-Module -Name Microsoft.PowerApps.Checker.PowerShell -Scope CurrentUser -Force
       displayName: 'Install Microsoft.PowerApps.Checker.PowerShell'
-    
+
     - powershell: |
         md '$(Common.TestResultsDirectory)\powerapps-checker'
 
@@ -29,7 +29,7 @@ stages:
         $ruleset = New-Object Microsoft.PowerApps.Checker.Client.Models.Ruleset
         $ruleset.Id = [Guid]::Parse('$(powerAppsChecker.rulesetId)')
 
-        Invoke-PowerAppsChecker `
+        $results = Invoke-PowerAppsChecker `
           -Geography $(azure.geography) `
           -ClientApplicationId $(powerAppsChecker.clientId) `
           -TenantId $(azure.tenantId) `
@@ -37,6 +37,9 @@ stages:
           -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
           -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
           -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
+
+        $issueSummary = $results.IssueSummary
+        Write-Host $issueSummary
       displayName: 'Invoke PowerApps Checker'
 
     - powershell: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
@@ -47,7 +50,7 @@ stages:
         archiveFilePatterns: '$(Common.TestResultsDirectory)\powerapps-checker\*.zip'
         destinationFolder: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
       displayName: 'Extract results to folder'
-    
+
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
