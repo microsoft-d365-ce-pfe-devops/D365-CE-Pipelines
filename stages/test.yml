@@ -44,10 +44,10 @@ stages:
           -or $issueSummary.MediumIssueCount -gt 0 `
           -or $issueSummary.LowIssueCount -gt 0 ) {
           Write-Host  "##vso[task.LogIssue type=error;]PowerApps Checker returned results that passed the allowable threshold. Please address these issues to allow the release stage."
-          Write-Host  "##vso[task.LogIssue type=error;]$issueSummary"
+          Write-Host  "##vso[task.LogIssue type=error;]$($issueSummary | Out-String)"
           exit 1
         } Else {
-          Write-Host "Issue Summary:\n$issueSummary"
+          Write-Host "Issue Summary:\n$($issueSummary | Out-String)"
         }
       displayName: 'Invoke PowerApps Checker'
 
