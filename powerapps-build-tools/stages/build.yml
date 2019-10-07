@@ -8,16 +8,7 @@ stages:
       vmImage: 'vs2017-win2016'
     steps:
 
-      - task: NuGetToolInstaller@0
-        displayName: 'Use NuGet 4.3.0'
-
-      - task: NuGetCommand@2
-        displayName: 'NuGet restore'
-
-      - task: VSBuild@1
-        inputs:
-          solution: '**\*.sln'
-        displayName: "Build .NET Solution"
+      - template: ../steps/build-dotNet-source.yml
 
       - task: VSTest@2
         displayName: 'VsTest - Test assemblies'
