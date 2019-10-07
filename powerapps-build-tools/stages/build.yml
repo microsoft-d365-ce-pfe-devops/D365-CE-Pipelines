@@ -1,12 +1,13 @@
 stages:
-- stage: Build
+- stage: Build_Test_CSharp
   jobs:
   - job:
-    displayName: "Pack Solution from repository"
+    displayName: "Build & Test .NET Code"
   
     pool:
       vmImage: 'vs2017-win2016'
     steps:
 
-        - powershell: |
-        Write-Host "Hello, World!"
+      - template: ../steps/build-dotNet-source.yml
+      - template: ../steps/test-dotNet-source.yml
+
