@@ -1,11 +1,27 @@
 stages:
-- stage: Build
+- stage: Build_Test_CSharp
   jobs:
   - job:
-    displayName: "Pack Solution from repository"
+    displayName: "Build & .NET Code"
   
     pool:
       vmImage: 'vs2017-win2016'
     steps:
 
-        - powershell: echo "Hello, World!"
+      - task: NuGetToolInstaller@0
+        displayName: 'Use NuGet 4.3.0'
+
+      - task: NuGetCommand@2
+        displayName: 'NuGet restore'
+
+      - task: VSBuild@1
+        displayName: 'Build solution **\*.sln'
+
+      - task: VSTest@2
+        displayName: 'VsTest - Test assemblies'
+        inputs:
+          testAssemblyVer2: |
+            **\*test*.dll
+            !**\*TestAdapter.dll
+            !**\obj\**
+            !**\UI\**
