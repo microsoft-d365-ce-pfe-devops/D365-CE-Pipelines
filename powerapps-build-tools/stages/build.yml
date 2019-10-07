@@ -1,0 +1,12 @@
+stages:
+- stage: Build
+  jobs:
+  - job:
+    displayName: "Pack Solution from repository"
+  
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+
+        - powershell: |
+        Write-Host "Hello, World!"
