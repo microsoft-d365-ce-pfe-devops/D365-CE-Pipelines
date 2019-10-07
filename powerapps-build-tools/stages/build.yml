@@ -2,7 +2,7 @@ stages:
 - stage: Build_Test_CSharp
   jobs:
   - job:
-    displayName: "Build & .NET Code"
+    displayName: "Build & Test .NET Code"
   
     pool:
       vmImage: 'vs2017-win2016'
@@ -15,7 +15,9 @@ stages:
         displayName: 'NuGet restore'
 
       - task: VSBuild@1
-        displayName: 'Build solution **\*.sln'
+        inputs:
+          solution: '**\*.sln'
+        displayName: "Build .NET Solution"
 
       - task: VSTest@2
         displayName: 'VsTest - Test assemblies'
