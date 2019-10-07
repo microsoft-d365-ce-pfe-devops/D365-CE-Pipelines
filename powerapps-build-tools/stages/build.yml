@@ -9,12 +9,5 @@ stages:
     steps:
 
       - template: ../steps/build-dotNet-source.yml
+      - template: ../steps/test-dotNet-source.yml
 
-      - task: VSTest@2
-        displayName: 'VsTest - Test assemblies'
-        inputs:
-          testAssemblyVer2: |
-            **\*test*.dll
-            !**\*TestAdapter.dll
-            !**\obj\**
-            !**\UI\**

@@ -8,5 +8,5 @@ steps:
 
   - task: VSBuild@1
     inputs:
-      solution: '**\*.sln'
+      solution: '**\*.sln'   # Build any .sln file found in repo
     displayName: "Build .NET Solution"
