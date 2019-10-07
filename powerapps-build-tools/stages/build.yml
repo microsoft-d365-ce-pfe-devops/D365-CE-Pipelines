@@ -8,5 +8,4 @@ stages:
       vmImage: 'vs2017-win2016'
     steps:
 
-        - powershell: |
-        Write-Host "Hello, World!"
+        - powershell: echo "Hello, World!"
