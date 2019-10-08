@@ -8,6 +8,6 @@ stages:
       vmImage: 'vs2017-win2016'
     
     steps:
-      - template: ../steps/dotNet/build-dotNet-source.yml
-      - template: ../steps/dotNet/test-dotNet-source.yml
-
+    # - template: ../steps/dotNet/build-dotNet-source.yml
+    # - template: ../steps/dotNet/test-dotNet-source.yml
+      - template: ../steps/solution-management/suggested-solution-build.yml
