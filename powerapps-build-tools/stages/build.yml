@@ -1,13 +1,16 @@
+parameters:
+  name: 'Build_Test_Solution'
+  vmImage: ''
+
 stages:
-- stage: Build_Test_CSharp
+
+- stage: ${{ parameters.name }}
   jobs:
   - job:
-    displayName: "Build & Test .NET Code"
+    displayName: "Build & Test Solution"
   
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: ${{ parameters.vmImage }}
+    
     steps:
-
-      - template: ../steps/build-dotNet-source.yml
-      - template: ../steps/test-dotNet-source.yml
-
+      - template: ../steps/solution-management/solution-build-recommended.yml

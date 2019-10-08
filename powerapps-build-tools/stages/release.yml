@@ -1,0 +1,28 @@
+parameters:
+  name: ''  # defaults for any parameters that aren't specified
+  dependsOn: 'Build_Test_Solution'
+  vmImage: ''
+  environment: ''
+
+stages: 
+- stage: ${{ parameters.name }}
+
+  dependsOn: ${{ parameters.dependsOn }}
+  condition: succeeded('${{ parameters.dependsOn }}') 
+
+  jobs:
+
+    - deployment: Release
+      displayName: "Release managed solution to downstream environments"
+
+      pool:
+        vmImage: ${{ parameters.vmImage }}
+      
+      environment: ${{ parameters.environment }}
+
+      strategy:
+        runOnce:
+          deploy:
+      
+            steps:
+              - template: ../steps/solution-management/solution-deployment.yml

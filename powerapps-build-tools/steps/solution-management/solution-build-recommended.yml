@@ -1,0 +1,46 @@
+# Suggested flow as seen in PowerApps ALM Labs
+# 1. Pack solution
+# 2. Import solution into clean build environment
+# 3. Export solution as managed artifact
+# 4. Publish artifact
+
+steps:
+  - template: install-powerapps-tools.yml 
+
+  - task: PowerAppsPackSolution@0
+    inputs:
+      SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solution.path)\$(solution.name)'
+      SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solution.name).zip'
+      SolutionType: Unmanaged
+      
+  - task: PowerAppsImportSolution@0
+    inputs:
+      PowerAppsEnvironment: 'Meecrosoft-build'
+      SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solution.name).zip'
+      ConvertToManaged: false
+      HoldingSolution: false
+      OverwriteUnmanagedCustomizations: true
+      PublishWorkflows: true
+      SkipProductUpdateDependencies: true
+      
+  - task: PowerAppsExportSolution@0
+    inputs:
+      PowerAppsEnvironment: 'Meecrosoft-build'
+      SolutionName: '$(solution.name)'
+      SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solution.name)_managed.zip'
+      Managed: true
+      ExportAutoNumberingSettings: false
+      ExportCalendarSettings: false
+      ExportCustomizationSettings: false
+      ExportEmailTrackingSettings: false
+      ExportGeneralSettings: false
+      ExportIsvConfig: false
+      ExportMarketingSettings: false
+      ExportOutlookSynchronizationSettings: false
+      ExportRelationshipRoles: false
+      ExportSales: false
+    displayName: 'PowerApps Export Solution - $(solution.name)_managed.zip'
+    
+  - publish: $(Build.ArtifactStagingDirectory)\$(solution.name)_managed.zip
+    artifact: drop
+    displayName: "Publish pipeline artifact - $(solution.name)_managed.zip as drop"
