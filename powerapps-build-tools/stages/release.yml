@@ -8,7 +8,7 @@ stages:
 - stage: ${{ parameters.name }}
 
   dependsOn: ${{ parameters.dependsOn }}
-  condition: succeeded('${{ parameters.dependsOn }}'') 
+  condition: succeeded('${{ parameters.dependsOn }}') 
 
   jobs:
 
