@@ -4,24 +4,26 @@ parameters:
   vmImage: ''
   environment: ''
 
-- stage: ${{ parameters.name }}
+- stages: 
 
-  dependsOn: ${{ parameters.dependsOn }}
-  condition: succeeded(${{ parameters.name }}) 
+  - stage: ${{ parameters.name }}
 
-  jobs:
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: succeeded(${{ parameters.dependsOn }}) 
 
-    - deployment: Release
-      displayName: "Release managed solution to downstream environments"
+    jobs:
 
-      pool:
-        vmImage: ${{ parameters.vmImage }}
-      
-      environment: ${{ parameters.environment }}
+      - deployment: Release
+        displayName: "Release managed solution to downstream environments"
 
-      strategy:
-        runOnce:
-          deploy:
-      
-            steps:
-              -template: ../steps/solution-management/solution-deployment.yml
+        pool:
+          vmImage: ${{ parameters.vmImage }}
+        
+        environment: ${{ parameters.environment }}
+
+        strategy:
+          runOnce:
+            deploy:
+        
+              steps:
+                -template: ../steps/solution-management/solution-deployment.yml
