@@ -1,11 +1,12 @@
 parameters:
   name: ''  # defaults for any parameters that aren't specified
+  dependsOn: 'Build_Test_Solution'
   vmImage: ''
   environment: ''
 
-- stage: Release
+- stage: ${{ parameters.name }}
 
-  dependsOn: ${{ parameters.name }}
+  dependsOn: ${{ parameters.dependsOn }}
   condition: succeeded(${{ parameters.name }}) 
 
   jobs:

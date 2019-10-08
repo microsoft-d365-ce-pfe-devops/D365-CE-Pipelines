@@ -1,8 +1,9 @@
 parameters:
+  name: 'Build_Test_Solution'
   vmImage: ''
 
 stages:
-- stage: Build_Test_Solution
+- stage: ${{ parameters.name }}
   jobs:
   - job:
     displayName: "Build & Test Solution"
