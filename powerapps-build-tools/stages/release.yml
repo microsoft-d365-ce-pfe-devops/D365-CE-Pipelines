@@ -5,6 +5,7 @@ parameters:
   # targetEnvironment - used for both the Azure Environment and Service Connection name in this example.
   # Example: contoso-production. 
   targetEnvironment: '' 
+  solutionName: ''
 
 stages: 
 - stage: ${{ parameters.name }}
@@ -30,4 +31,4 @@ stages:
               - template: ../steps/solution-deploy.yml
                 parameters: 
                   powerAppsEnvironment: '${{ parameters.targetEnvironment }}'
-                  solutionName: ''
+                  solutionName: '${{ parameters.solutionName }}'
