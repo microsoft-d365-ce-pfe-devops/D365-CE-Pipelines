@@ -1,6 +1,9 @@
 parameters:
   name: 'Build_Test_Solution'
   vmImage: ''
+  buildEnvironment: ''
+  solutionPath: ''
+  solutionName: ''
 
 stages:
 
@@ -13,4 +16,11 @@ stages:
       vmImage: ${{ parameters.vmImage }}
     
     steps:
-      - template: ../steps/solution-management/solution-build-recommended.yml
+      - template: ../steps/solution-management/solution-build-pack-solution.yml
+        parameters: 
+          solutionPath: '${{ parameters.solutionPath }}'
+          solutionName: '${{ parameters.solutionName }}'
+      - template: ../steps/solution-management/solution-build-create-managed-artifact.yml
+        parameters: 
+          powerAppsEnvironment: '${{ parameters.buildEnvironment }}'
+          solutionName: '${{ parameters.solutionName }}'

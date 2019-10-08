@@ -1,13 +1,16 @@
 # Artifact download is not included. Recommended to deploy in deployment job
 # Artifact is automatically downloaded as part of deployment job
- 
+parameters: 
+  powerAppsEnvironment: ''
+  solutionName: ''
+
 steps:
   - template: install-powerapps-tools.yml 
 
   - task: PowerAppsImportSolution@0
     inputs:
-      PowerAppsEnvironment: 'Meecrosoft-Production'
-      SolutionInputFile: '$(Pipeline.Workspace)\drop\$(solution.name)_managed.zip'
+      PowerAppsEnvironment: '${{ parameters.powerAppsEnvironment }}'
+      SolutionInputFile: '$(Pipeline.Workspace)\drop\${{ parameters.powerAppsEnvironment }}_managed.zip'
       ConvertToManaged: false
       OverwriteUnmanagedCustomizations: true
       HoldingSolution: false
