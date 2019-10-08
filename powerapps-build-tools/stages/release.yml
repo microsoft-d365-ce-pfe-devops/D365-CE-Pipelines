@@ -25,4 +25,4 @@ stages:
           deploy:
       
             steps:
-              -template: ../steps/solution-management/solution-deployment.yml
+              - template: ../steps/solution-management/solution-deployment.yml
