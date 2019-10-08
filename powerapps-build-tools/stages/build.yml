@@ -3,6 +3,7 @@ parameters:
   vmImage: ''
 
 stages:
+
 - stage: ${{ parameters.name }}
   jobs:
   - job:

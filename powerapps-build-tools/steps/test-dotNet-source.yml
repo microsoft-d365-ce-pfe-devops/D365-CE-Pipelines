@@ -1,0 +1,10 @@
+steps:
+
+  - task: VSTest@2
+    displayName: 'VsTest - Test assemblies'
+    inputs:
+      testAssemblyVer2: |
+        **\*test*.dll   # Assumes test binaries contain the work "test"
+        !**\*TestAdapter.dll
+        !**\obj\**
+        !**\UI\**
