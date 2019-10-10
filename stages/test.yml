@@ -39,15 +39,13 @@ stages:
           -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
 
         $issueSummary = $results.IssueSummary
-        If (   $issueSummary.CriticalIssueCount -gt 0 `
-          -or $issueSummary.HighIssueCount -gt 0 `
-          -or $issueSummary.MediumIssueCount -gt 0 `
-          -or $issueSummary.LowIssueCount -gt 0 ) {
-          Write-Host  "##vso[task.LogIssue type=error;]PowerApps Checker returned results that passed the allowable threshold. Please address these issues to allow the release stage."
-          Write-Host  "##vso[task.LogIssue type=error;]$($issueSummary | Out-String)"
+        Write-Host "Issue Summary:\n$($issueSummary | Out-String)"
+        If (    $issueSummary.CriticalIssueCount -gt $(MaxCriticalIssueCount) `
+            -or $issueSummary.HighIssueCount -gt $(MaxHighIssueCount) `
+            -or $issueSummary.MediumIssueCount -gt $(MaxMediumIssueCount) `
+            -or $issueSummary.LowIssueCount -gt $(MaxLowIssueCount) ) {
+          Write-Host "##vso[task.LogIssue type=error;]PowerApps Checker returned results that passed the allowable threshold. Please address these issues to allow the release stage to run."
           exit 1
-        } Else {
-          Write-Host "Issue Summary:\n$($issueSummary | Out-String)"
         }
       displayName: 'Invoke PowerApps Checker'
 
