@@ -1,15 +1,25 @@
-stages:
-- stage: Test
+parameters:
+  powerAppsChecker.rulesetId: ''
+  powerAppsChecker.clientId: ''
+  powerAppsChecker.clientSecret: ''
+  solution.name: ''
+  azure.geography: ''
+  azure.tenantId: ''
+  dependsOn: ''
+  vmImage: ''
 
-  dependsOn: Build
-  condition: succeeded('Build')
+stages:
+- stage: PowerApps_Checker
+
+  dependsOn: ${{ parameters.dependsOn }}
+  condition: succeeded('${{ parameters.dependsOn }}')
 
   jobs:
   - job:
     displayName: 'Run PowerApps Checker'
 
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: '${{ parameters.vmImage }}'
 
     steps:
     - task: DownloadBuildArtifacts@0
@@ -27,16 +37,16 @@ stages:
 
         Import-Module Microsoft.PowerApps.Checker.PowerShell
         $ruleset = New-Object Microsoft.PowerApps.Checker.Client.Models.Ruleset
-        $ruleset.Id = [Guid]::Parse('$(powerAppsChecker.rulesetId)')
+        $ruleset.Id = [Guid]::Parse('${{ parameters.powerAppsChecker.rulesetId }} ')
 
         Invoke-PowerAppsChecker `
           -Geography $(azure.geography) `
-          -ClientApplicationId $(powerAppsChecker.clientId) `
+          -ClientApplicationId ${{ parameters.powerAppsChecker.clientId }} `
           -TenantId $(azure.tenantId) `
           -Ruleset $ruleset `
-          -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip' `
+          -FileUnderAnalysis '$(System.ArtifactsDirectory)\drop\packedSolution\${{ parameters.solution.name }}_managed.zip' `
           -OutputDirectory '$(Common.TestResultsDirectory)\powerapps-checker' `
-          -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '$(powerAppsChecker.clientSecret)')
+          -ClientApplicationSecret (ConvertTo-SecureString -AsPlainText -Force -String '${{ parameters.powerAppsChecker.clientSecret }}')
       displayName: 'Invoke PowerApps Checker'
 
     - powershell: md '$(Common.TestResultsDirectory)\powerapps-checker\unzipped'
