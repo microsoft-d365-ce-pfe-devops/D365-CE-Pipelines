@@ -4,6 +4,11 @@ parameters:
   buildEnvironment: ''
   solutionPath: ''
   solutionName: ''
+  powerAppsChecker.rulesetId: ''
+  powerAppsChecker.clientId: ''
+  powerAppsChecker.clientSecret: ''
+  azure.geography: ''
+  azure.tenantId: ''
 
 stages:
 
@@ -20,6 +25,15 @@ stages:
         parameters: 
           solutionPath: '${{ parameters.solutionPath }}'
           solutionName: '${{ parameters.solutionName }}'
+      - template: ../../stages/powerapps-checker.yml
+        parameters:
+          powerAppsChecker.rulesetId: ''
+          powerAppsChecker.clientId: ''
+          powerAppsChecker.clientSecret: ''
+          solutionName: 'parameters.solutionName'
+          azure.geography: ''
+          azure.tenantId: ''
+          vmImage: 'parameters.vmImage'
       - template: ../steps/solution-build-create-managed-artifact.yml
         parameters: 
           powerAppsEnvironment: '${{ parameters.buildEnvironment }}'

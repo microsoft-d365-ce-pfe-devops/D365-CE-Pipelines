@@ -5,14 +5,10 @@ parameters:
   solution.name: ''
   azure.geography: ''
   azure.tenantId: ''
-  dependsOn: ''
   vmImage: ''
 
 stages:
 - stage: PowerApps_Checker
-
-  dependsOn: ${{ parameters.dependsOn }}
-  condition: succeeded('${{ parameters.dependsOn }}')
 
   jobs:
   - job:
