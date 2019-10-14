@@ -1,0 +1,18 @@
+# Artifact download is not included. Recommended to deploy in deployment job
+# Artifact is automatically downloaded as part of deployment job
+parameters: 
+  powerAppsEnvironment: ''
+  solutionName: ''
+
+steps:
+  - template: install-powerapps-tools.yml 
+
+  - task: PowerAppsImportSolution@0
+    inputs:
+      PowerAppsEnvironment: '${{ parameters.powerAppsEnvironment }}'
+      SolutionInputFile: '$(Pipeline.Workspace)\drop\${{ parameters.solutionName }}_managed.zip'
+      ConvertToManaged: false
+      OverwriteUnmanagedCustomizations: true
+      HoldingSolution: false
+      SkipProductUpdateDependencies: true
+      PublishWorkflows: true

@@ -1,0 +1,34 @@
+parameters:
+  name: ''  # defaults for any parameters that aren't specified
+  dependsOn: 'Build_Test_Solution'
+  vmImage: ''
+  # targetEnvironment - used for both the Azure Environment and Service Connection name in this example.
+  # Example: contoso-production. 
+  targetEnvironment: '' 
+  solutionName: ''
+
+stages: 
+- stage: ${{ parameters.name }}
+
+  dependsOn: ${{ parameters.dependsOn }}
+  condition: succeeded('${{ parameters.dependsOn }}') 
+
+  jobs:
+
+    - deployment: Deploy
+      displayName: "Deploy managed solution to downstream environments"
+
+      pool:
+        vmImage: ${{ parameters.vmImage }}
+      
+      environment: ${{ parameters.targetEnvironment }}
+
+      strategy:
+        runOnce:
+          deploy:
+      
+            steps:
+              - template: ../steps/solution-deploy.yml
+                parameters: 
+                  powerAppsEnvironment: '${{ parameters.targetEnvironment }}'
+                  solutionName: '${{ parameters.solutionName }}'
