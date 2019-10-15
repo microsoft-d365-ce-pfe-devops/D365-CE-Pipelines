@@ -1,0 +1,60 @@
+parameters:
+  artifactName: 'drop'
+  feed: ''
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Publish
+  
+  jobs:
+  - job: 'Publish to Artifacts feed'
+
+    pool:
+      vmImage: '${{ parameters.vmImage }}'
+    
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifactName: '${{ parameters.artifactName }}'
+
+    - powershell: |
+        $solution = (Get-Content -Raw -Path '$(Pipeline.Workspace)\$env:ARTIFACT_NAME' | ConvertFrom-Json)
+
+        If ($solution.packageName -eq $null) {
+          $packageName = '$solution.solutionName'.ToLower() -Replace '_', '-'
+        } Else {
+          $packageName = $solution.packageName
+        }
+        Write-Host "##vso[task.setvariable variable=package.name]$packageName"
+
+        Write-Host "##vso[task.setvariable variable=package.description]$solution.description"
+      displayName: 'Get package properties from solution'
+      env:
+        ARTIFACT_NAME: ${{ parameters.artifactName }}
+
+    - task: UniversalPackages@0
+      displayName: 'Get existing package'
+      name: GetExisting
+      inputs:
+        command: 'download'
+        downloadDirectory: '$(Pipeline.Workspace)/packages/$(package.name)'
+        feedsToUse: 'internal'
+        vstsFeed: '${{ parameters.feed }}'
+        vstsFeedPackage: '$(package.name)'
+        vstsPackageVersion: '*'
+      continueOnError: true
+    
+    - powershell:
+      condition: 
+    
+    - task: UniversalPackages@0
+      displayName: 'Publish to Artifact feed'
+      inputs:
+        command: 'publish'
+        publishDirectory: '$(Pipeline.Workspace)\\${{ parameters.artifactName }}'
+        feedsToUsePublish: 'internal'
+        packagePublishDescription: '$(package.description)'
+        vstsFeedPackagePublish: '$(package.name)'
+        vstsFeedPublish: '${{ parameters.feed }}'
+        versionOption: 'custom'
+        versionPublish: '1.1.*'
