@@ -1,10 +1,14 @@
-# Artifact download is not included. Recommended to deploy in deployment job
-# Artifact is automatically downloaded as part of deployment job
-parameters: 
+parameters:
+  name: ''
+  pool: ''
   powerAppsEnvironment: ''
   solutionName: ''
 
-steps:
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}
+  
+  steps:
   - template: install-powerapps-tools.yml 
 
   - task: PowerAppsImportSolution@0
