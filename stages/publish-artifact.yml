@@ -1,5 +1,5 @@
 parameters:
-  artifactName: 'drop'
+  artifact.name: 'drop'
   feed: ''
   vmImage: 'ubuntu-latest'
 
@@ -15,7 +15,7 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        artifactName: '${{ parameters.artifactName }}'
+        artifactName: '${{ parameters.artifact.name }}'
 
     - powershell: |
         $solution = (Get-Content -Raw -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/solution.json" | ConvertFrom-Json)
@@ -39,7 +39,7 @@ stages:
         ).Node.InnerText
         Write-Host "##vso[task.setvariable variable=solution.version]$version"
       env:
-        ARTIFACT_NAME: ${{ parameters.artifactName }}
+        ARTIFACT_NAME: ${{ parameters.artifact.name }}
       displayName: 'Get package properties from solution'
     
     - powershell: |
@@ -84,7 +84,7 @@ stages:
     - task: UniversalPackages@0
       inputs:
         command: 'publish'
-        publishDirectory: '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
+        publishDirectory: '$(Pipeline.Workspace)/${{ parameters.artifact.name }}'
         feedsToUsePublish: 'internal'
         vstsFeedPublish: '${{ parameters.feed }}'
         vstsFeedPackagePublish: '$(package.name)'
