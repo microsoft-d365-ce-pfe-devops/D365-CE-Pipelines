@@ -7,7 +7,7 @@ stages:
 - stage: Publish
   
   jobs:
-  - job: 'Publish to Artifacts feed'
+  - job: Publish
 
     pool:
       vmImage: '${{ parameters.vmImage }}'
@@ -82,6 +82,7 @@ stages:
       displayName: 'Set package version'
 
     - task: UniversalPackages@0
+      displayName: 'Publish package'
       inputs:
         command: 'publish'
         publishDirectory: '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
