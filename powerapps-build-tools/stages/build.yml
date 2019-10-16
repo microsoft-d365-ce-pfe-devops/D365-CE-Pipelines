@@ -1,8 +1,8 @@
 parameters:
-  artifact.name: 'solution'
+  artifactName: 'solution'
   name: 'Build_Solution'
-  solution.name: ''
-  solution.path: 'xml'
+  solutionName: ''
+  solutionPath: 'xml'
   vmImage: 'windows-latest'
 
 stages:
@@ -20,15 +20,15 @@ stages:
 
     - task: PowerAppsPackSolution@0
       inputs:
-        SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solution.path }}'
-        SolutionOutputFile: '$(Pipeline.Workspace)\artifact\${{ parameters.solution.name }}.zip'
+        SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
+        SolutionOutputFile: '$(Pipeline.Workspace)\artifact\${{ parameters.solutionName }}.zip'
         SolutionType: Both
     
     - task: CopyFiles@2
       inputs:
-        sourceFolder: '$(solution.path)/..'
+        sourceFolder: '${{ parameters.solutionPath }}/..'
         contents: 'solution.json'
         targetFolder: $(Pipeline.Workspace)\artifact
       
     - publish: '$(Pipeline.Workspace)\artifact'
-      artifact: ${{ parameters.artifact.name }}
+      artifact: ${{ parameters.artifactName }}
