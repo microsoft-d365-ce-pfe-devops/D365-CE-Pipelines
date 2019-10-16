@@ -15,7 +15,7 @@ jobs:
  #
   - task: PowerAppsPackSolution@0
     inputs:
-      SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}\${{ parameters.solutionName }}'
+      SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
       SolutionOutputFile: '$(Pipeline.Workspace)\${{ parameters.solutionName }}.zip'
       SolutionType: Both
 
