@@ -15,9 +15,8 @@ stages:
     steps:
     - checkout: none
 
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifactName: '${{ parameters.artifactName }}'
+    - download: current
+      artifact: '${{ parameters.artifactName }}'
 
     - powershell: |
         $solution = (Get-Content -Raw -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/solution.json" | ConvertFrom-Json)
