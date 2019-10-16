@@ -27,7 +27,7 @@ stages:
         }
         Write-Host "##vso[task.setvariable variable=package.name]$packageName"
 
-        $description = $solution.description
+        $description = If($solution.description -eq $null) { "" } Else { $solution.description }
         Write-Host "##vso[task.setvariable variable=package.description]$description"
 
         Expand-Archive `
