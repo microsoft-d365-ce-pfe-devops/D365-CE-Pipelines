@@ -16,9 +16,9 @@ jobs:
   - task: PowerAppsPackSolution@0
     inputs:
       SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
-      SolutionOutputFile: '$(Pipeline.Workspace)\${{ parameters.solutionName }}.zip'
+      SolutionOutputFile: '$(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}.zip'
       SolutionType: Both
 
-  - publish: $(Pipeline.Workspace)\${{ parameters.solutionName }}_managed.zip
+  - publish: $(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}_managed.zip
     artifact: drop
     displayName: "Publish pipeline artifact - ${{ parameters.solutionName }}_managed.zip as drop"
