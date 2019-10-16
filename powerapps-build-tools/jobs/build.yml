@@ -12,11 +12,11 @@ jobs:
 
   - template: ../steps/install-powerapps-tools.yml 
 
- - task: PowerAppsPackSolution@0
-    inputs:
-      SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}\${{ parameters.solutionName }}'
-      SolutionOutputFile: '$(Pipeline.Workspace)\${{ parameters.solutionName }}.zip'
-      SolutionType: Both
+  - task: PowerAppsPackSolution@0
+      inputs:
+        SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}\${{ parameters.solutionName }}'
+        SolutionOutputFile: '$(Pipeline.Workspace)\${{ parameters.solutionName }}.zip'
+        SolutionType: Both
 
   - publish: $(Pipeline.Workspace)\${{ parameters.solutionName }}_managed.zip
     artifact: drop
