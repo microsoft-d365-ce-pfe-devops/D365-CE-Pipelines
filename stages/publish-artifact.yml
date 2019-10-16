@@ -18,43 +18,75 @@ stages:
         artifactName: '${{ parameters.artifactName }}'
 
     - powershell: |
-        $solution = (Get-Content -Raw -Path '$(Pipeline.Workspace)\$env:ARTIFACT_NAME' | ConvertFrom-Json)
+        $solution = (Get-Content -Raw -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/solution.json" | ConvertFrom-Json)
 
         If ($solution.packageName -eq $null) {
-          $packageName = '$solution.solutionName'.ToLower() -Replace '_', '-'
+          $packageName = $solution.name.ToLower() -Replace '_', '-'
         } Else {
           $packageName = $solution.packageName
         }
         Write-Host "##vso[task.setvariable variable=package.name]$packageName"
 
-        Write-Host "##vso[task.setvariable variable=package.description]$solution.description"
-      displayName: 'Get package properties from solution'
+        $description = $solution.description
+        Write-Host "##vso[task.setvariable variable=package.description]$description"
+
+        Expand-Archive `
+          -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/$($solution.name).zip" `
+          -DestinationPath "$(Pipeline.Workspace)/solutionContents"
+        $version = (Select-Xml `
+          -Path "$(Pipeline.Workspace)/solutionContents/solution.xml" `
+          -XPath "/ImportExportXml/SolutionManifest/Version"
+        ).Node.InnerText
+        Write-Host "##vso[task.setvariable variable=solution.version]$version"
       env:
         ARTIFACT_NAME: ${{ parameters.artifactName }}
+      displayName: 'Get package properties from solution'
+    
+    - powershell: |
+        $head = @{ Authorization = "Bearer $(System.AccessToken)" }
+        $feedsUrl = "$(System.TeamFoundationCollectionUri)" -Replace "^https://dev\.", "https://feeds.dev."
+        $url = "$($feedsUrl)_apis/packaging/Feeds/$env:FEED/packages?packageNameQuery=$env:PACKAGE_NAME&api-version=5.1-preview.1"
+        $packages = Invoke-RestMethod -Uri $url -Method Get -Headers $head -ContentType application/json
+        $package = $packages.value.Where({ $_.name -eq $env:PACKAGE_NAME })
+
+        $solutionVersion = $env:SOLUTION_VERSION
+        $solutionMajorMinor = $solutionVersion -Replace "^([0-9]*\.[0-9]*).*", "`$1"
+
+        If($package.Count -gt 0) {
+          $latestVersion = $package.versions[0].version
+          Write-Host "Package current latest version: $latestVersion"
+          
+          $latestMajorMinor = $latestVersion -Replace "^([0-9]*\.[0-9]*).*", "`$1"
+          If($latestMajorMinor -eq $solutionMajorMinor) {
+            Write-Host "Solution major/minor version matches package version. Publishing as patch."
+            Write-Host "##vso[task.setvariable variable=package.versionOption]patch"
+          } Else {
+            Write-Host "Solution major/minor version has changed. Using solution version."
+            $useSolutionVersion = $true
+          }
+        } Else {
+          Write-Host "Package does not exist. Using solution version."
+          $useSolutionVersion = $true
+        }
+
+        If($useSolutionVersion) {
+          $packageVersion = "$solutionMajorMinor.0"
+          Write-Host "##vso[task.setvariable variable=package.versionOption]custom"
+          Write-Host "##vso[task.setvariable variable=package.version]$packageVersion"
+        }
+
+      env:
+        FEED: ${{ parameters.feed }}
+        PACKAGE_NAME: $(package.name)
+        SOLUTION_VERSION: $(solution.version)
+      displayName: 'Set package version'
 
     - task: UniversalPackages@0
-      displayName: 'Get existing package'
-      name: GetExisting
-      inputs:
-        command: 'download'
-        downloadDirectory: '$(Pipeline.Workspace)/packages/$(package.name)'
-        feedsToUse: 'internal'
-        vstsFeed: '${{ parameters.feed }}'
-        vstsFeedPackage: '$(package.name)'
-        vstsPackageVersion: '*'
-      continueOnError: true
-    
-    - powershell:
-      condition: 
-    
-    - task: UniversalPackages@0
-      displayName: 'Publish to Artifact feed'
       inputs:
         command: 'publish'
-        publishDirectory: '$(Pipeline.Workspace)\\${{ parameters.artifactName }}'
+        publishDirectory: '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
         feedsToUsePublish: 'internal'
-        packagePublishDescription: '$(package.description)'
-        vstsFeedPackagePublish: '$(package.name)'
         vstsFeedPublish: '${{ parameters.feed }}'
-        versionOption: 'custom'
-        versionPublish: '1.1.*'
+        vstsFeedPackagePublish: '$(package.name)'
+        versionOption: '$(package.versionOption)'
+        versionPublish: '$(package.version)'
