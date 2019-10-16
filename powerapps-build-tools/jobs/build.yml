@@ -1,6 +1,6 @@
 parameters:
   name: ''
-  pool: ''
+  pool: {}
   solutionPath: ''
   solutionName: ''
 
