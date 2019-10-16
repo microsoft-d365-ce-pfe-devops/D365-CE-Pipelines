@@ -13,6 +13,8 @@ stages:
       vmImage: '${{ parameters.vmImage }}'
     
     steps:
+    - checkout: none
+
     - task: DownloadPipelineArtifact@2
       inputs:
         artifactName: '${{ parameters.artifactName }}'
