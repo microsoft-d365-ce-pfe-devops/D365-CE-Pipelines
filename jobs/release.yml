@@ -1,15 +1,24 @@
-stages:
-- stage: Release
+parameters:
+  name: 'Release'
+  dependsOn: 'Test'
+  condition: 'succeeded(''Test'')'
+  vmImage: 'windows-latest'
 
-  dependsOn: Test
-  condition: succeeded('Test')
+stages:
+- stage: ${{ parameters.name }}
+
+  ${{ if neq(parameters.dependsOn, '') }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  
+  ${{ if neq(parameters.condition, '') }}:
+    condition: ${{ parameters.condition }}
 
   jobs:
   - deployment: Deploy
     displayName: "Import solution artifact"
 
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: ${{ parameters.vmImage }}
     
     environment: test
     strategy:

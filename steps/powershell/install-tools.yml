@@ -1,0 +1,11 @@
+parameters:
+  toolsDirectory: $(Pipeline.Workspace)\tools
+
+steps:
+- task: PowerShell@2
+  name: 'Install-Tools'
+  inputs:
+    targetType: 'filePath'
+    filePath: '../powershell/install-tools.ps1'
+    arguments:
+      toolsDirectory: ${{ parameters.toolsDirectory }}
