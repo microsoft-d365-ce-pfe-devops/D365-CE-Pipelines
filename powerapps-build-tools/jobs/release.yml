@@ -1,10 +1,17 @@
 parameters:
   name: ''
   pool: {}
-  targetEnvironment: '' # Azure DevOps Environment
+  # Azure Pipeline Environment
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops
+  pipelineEnvironment: '' 
   powerAppsEnvironment: '' # PowerApps Service Connection
   solutionName: ''
-  
+  convertToManaged: false
+  overwriteUnmanagedCustomizations: true
+  holdingSolution: false
+  skipProductUpdateDependencies: true
+  publishWorkflows: true
+
 jobs:
 
     - deployment: ${{ parameters.name }}
@@ -12,22 +19,24 @@ jobs:
 
       pool: ${{ parameters.pool }}
       
-      environment: ${{ parameters.targetEnvironment }}
+      environment: ${{ parameters.pipelineEnvironment }}
 
       strategy:
         runOnce:
           deploy:
       
             steps:
-  
+            # Deployment jobs automatically download pipeline artifacts
+            # Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#artifacts-in-release-and-deployment-jobs
+
             - template: install-powerapps-tools.yml 
 
             - task: PowerAppsImportSolution@0
               inputs:
                 PowerAppsEnvironment: '${{ parameters.powerAppsEnvironment }}'
-                SolutionInputFile: '$(Pipeline.Workspace)\drop\${{ parameters.solutionName }}_managed.zip'
-                ConvertToManaged: false
-                OverwriteUnmanagedCustomizations: true
-                HoldingSolution: false
-                SkipProductUpdateDependencies: true
-                PublishWorkflows: true
+                SolutionInputFile: '$(Pipeline.Workspace)\solution-artifact\${{ parameters.solutionName }}_managed.zip'
+                ConvertToManaged: ${{ parameters.convertToManaged }}
+                OverwriteUnmanagedCustomizations: ${{ parameters.overwriteUnmanagedCustomizations }}
+                HoldingSolution: ${{ parameters.holdingSolution }}
+                SkipProductUpdateDependencies: ${{ parameters.skipProductUpdateDependencies }}
+                PublishWorkflows: ${{ parameters.publishWorkflows }}
