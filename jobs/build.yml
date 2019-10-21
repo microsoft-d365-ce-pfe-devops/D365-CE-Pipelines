@@ -1,15 +1,15 @@
 parameters:
   jobProperties: {}
-  solutionJsonPath: solution.json
+  solutionJsonPath: 'solution.json'
   toolset: 'powerapps-build-tools'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
 jobs:
 - job:
-  ${{ if eq(parameters.jobProperties.name, null) }}:
+  ${{ if eq(parameters.jobProperties.name, '') }}:
     name: 'Build'
 
-  ${{ if eq(parameters.jobProperties.pool, null) }}:
+  ${{ if eq(parameters.jobProperties.pool, '') }}:
     pool:
       vmImage: 'windows-latest'
   
