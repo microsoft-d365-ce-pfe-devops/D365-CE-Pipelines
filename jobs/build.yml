@@ -5,9 +5,7 @@ parameters:
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
 jobs:
-- job:
-  ${{ if eq(parameters.jobProperties.name, '') }}:
-    name: 'Build'
+- job: ${{ coalesce(parameters.jobProperties.name, 'Build') }}
 
   ${{ if eq(parameters.jobProperties.pool, '') }}:
     pool:
