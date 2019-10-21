@@ -23,12 +23,11 @@ jobs:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
   
-  - template: ../steps/pack-solution.yml
-    parameters:
-      solutionJsonPath: ${{ parameters.solutionJsonPath }}
-      toolset: ${{ parameters.toolset }}
-      toolsDirectory: ${{ parameters.toolsDirectory }}
-    enabled: false
+#  - template: ../steps/pack-solution.yml
+#    parameters:
+#      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+#      toolset: ${{ parameters.toolset }}
+#      toolsDirectory: ${{ parameters.toolsDirectory }}
   
   - task: PublishBuildArtifacts@1
     inputs:
