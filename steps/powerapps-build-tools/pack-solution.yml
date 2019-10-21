@@ -1,0 +1,28 @@
+parameters:
+  solutionJsonPath: 'solution.json'
+  solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
+  solutionType: 'Both'
+
+steps:
+- pwsh: |
+    $solution = `
+      Get-Content `
+        -Raw `
+        -Path $env:SOLUTION_JSON_PATH `
+      | ConvertFrom-Json
+    Write-Host "##vso[task.setvariable variable=solutionName]$solution.name"
+
+    If($solution.path) { 
+      $solutionPath = $solution.path
+    } Else {
+      $solutionPath = "contents"
+    }
+    Write-Host "##vso[task.setvariable variable=solutionPath]$solutionPath"
+  env:
+    SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
+
+- task: PowerAppsPackSolution@0
+    inputs:
+      SolutionSourceFolder: '$(solutionPath)'
+      SolutionOutputFile: ${{ parameters.solutionOutputFile }}
+      SolutionType: ${{ parameters.solutionType }}

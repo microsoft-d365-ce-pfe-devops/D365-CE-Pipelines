@@ -1,0 +1,11 @@
+steps:
+- powershell: |
+    Start-Process tools/CoreTools/SolutionPackager.exe `
+    -ArgumentList `
+      "/action: Pack", `
+      "/zipfile: $(build.artifactStagingDirectory)\packedSolution\$(solution.name).zip", `
+      "/folder: $(solution.path)", `
+      "/packagetype: Both" `
+    -Wait `
+    -NoNewWindow
+  displayName: 'Solution Packager: pack solution'

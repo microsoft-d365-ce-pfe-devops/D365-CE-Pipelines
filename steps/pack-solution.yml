@@ -1,0 +1,10 @@
+parameters:
+  solutionJsonPath: solution.json
+  toolset: 'powerapps-build-tools' # [ 'powerapps-build-tools' | 'powershell' ]
+  toolsDirectory: '$(Pipeline.Workspace)\tools' # only relevant if toolset = 'powershell'
+
+steps:
+- template: ${{ parameters.toolset }}/pack-solution.yml
+  parameters:
+    solutionJsonPath: ${{ parameters.solutionJsonPath }}
+    toolsDirectory: ${{ parameters.toolsDirectory }}

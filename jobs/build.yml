@@ -1,10 +1,6 @@
 parameters:
   jobProperties: {}
-  stepProperties: {
-    installTools: {},
-    packSolution: {},
-    publishArtifact: {}
-  }
+  solutionJsonPath: solution.json
   toolset: 'powerapps-build-tools'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
@@ -12,54 +8,31 @@ jobs:
 - job:
   ${{ if eq(parameters.jobProperties.name, null) }}:
     name: 'Build'
-  
+
   ${{ if eq(parameters.jobProperties.pool, null) }}:
     pool:
       vmImage: 'windows-latest'
   
-  ${{ insert }}: ${{ parameters.jobProperties }}
+  ${{ each pair in parameters.jobProperties }}:
+    ${{ if not(in(pair.key, 'name', 'pool')) }}:
+      ${{ pair.key }}: ${{ pair.value }}
 
   steps:
   - template: ../steps/install-tools.yml
     parameters:
-      ${{ parameters }}
       toolset: ${{ parameters.toolset }}
-      toolsDirectory: '$(Pipeline.Workspace)\tools'
-  - ${{ if eq(parameters.toolset, 'powerapps-build-tools') }}:
-    - template: ../steps/powerapps-build-tools/install-tools.yml
-      parameters:
-        stepProperties: ${{ parameters.jobProperties.installTools }}
-
-    - task: PowerAppsPackSolution@0
-      inputs:
-        SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
-        SolutionOutputFile: '$(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}.zip'
-        SolutionType: Both
-
-  - ${{ if eq(parameters.toolset, 'powershell') }}:
-    - task: PowerShell@2
-      name: 'Install-Tools'
-      inputs:
-        targetType: 'filePath'
-        filePath: '../powershell/install-tools.ps1'
-        arguments:
-          toolsDirectory: ${{ parameters.toolsDirectory }}
-        ${{ insert }}: ${{ parameters.}}
-
-    - template: ../steps/powershell/pack-solution.yml
-  - powershell: |
-      Start-Process tools/CoreTools/SolutionPackager.exe `
-      -ArgumentList `
-        "/action: Pack", `
-        "/zipfile: $(build.artifactStagingDirectory)\packedSolution\$(solution.name).zip", `
-        "/folder: $(solution.path)", `
-        "/packagetype: Both" `
-      -Wait `
-      -NoNewWindow
-    displayName: 'Solution Packager: pack solution'
+      toolsDirectory: ${{ parameters.toolsDirectory }}
+  
+  - template: ../steps/pack-solution.yml
+    parameters:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      toolset: ${{ parameters.toolset }}
+      toolsDirectory: ${{ parameters.toolsDirectory }}
+    enabled: false
   
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: $(Build.ArtifactStagingDirectory)
       artifactName: drop
     displayName: 'Publish build artifacts'
+    enabled: false
