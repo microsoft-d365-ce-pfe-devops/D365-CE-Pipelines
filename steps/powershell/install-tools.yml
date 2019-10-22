@@ -21,6 +21,6 @@ steps:
       -Path "$toolsDirectory\\$coreToolsFolder\\content\\bin\\coretools\\*.*" `
       -Destination "$toolsDirectory\\CoreTools"
     Remove-Item "$toolsDirectory\\$coreToolsFolder" -Force -Recurse
-  name: 'Install-Tools'
+  name: 'InstallTools'
   env:
     TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}
