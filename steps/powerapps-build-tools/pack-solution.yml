@@ -8,8 +8,8 @@ steps:
   parameters:
     solutionJsonPath: ${{ parameters.solutionJsonPath }}
 
-#- task: PowerAppsPackSolution@0
-#  inputs:
-#    SolutionSourceFolder: '$(solutionPath)'
-#    SolutionOutputFile: ${{ parameters.solutionOutputFile }}
-#    SolutionType: ${{ parameters.solutionType }}
+- task: PowerAppsPackSolution@0
+  inputs:
+    SolutionSourceFolder: '$(solutionPath)'
+    SolutionOutputFile: ${{ parameters.solutionOutputFile }}
+    SolutionType: ${{ parameters.solutionType }}
