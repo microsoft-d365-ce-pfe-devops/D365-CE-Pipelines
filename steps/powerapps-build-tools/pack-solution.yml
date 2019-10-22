@@ -22,7 +22,7 @@ steps:
     SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
 
 - task: PowerAppsPackSolution@0
-    inputs:
-      SolutionSourceFolder: '$(solutionPath)'
-      SolutionOutputFile: ${{ parameters.solutionOutputFile }}
-      SolutionType: ${{ parameters.solutionType }}
+  inputs:
+    SolutionSourceFolder: '$(solutionPath)'
+    SolutionOutputFile: ${{ parameters.solutionOutputFile }}
+    SolutionType: ${{ parameters.solutionType }}
