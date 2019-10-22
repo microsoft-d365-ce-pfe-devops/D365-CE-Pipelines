@@ -1,4 +1,5 @@
 parameters:
+  artifactName: 'packed-solution'
   jobProperties: {}
   solutionJsonPath: 'solution.json'
   solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
@@ -34,6 +35,5 @@ jobs:
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: $(Build.ArtifactStagingDirectory)
-      artifactName: drop
-    displayName: 'Publish build artifacts'
-    enabled: false
+      artifactName: ${{ parameters.artifactName }}
+    displayName: 'Publish build artifact'
