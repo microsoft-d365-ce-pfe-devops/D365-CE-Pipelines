@@ -3,7 +3,7 @@ parameters:
 
 steps:
 - task: PowerShell@2
-  name: 'Read-Solution-Json'
+  name: 'ReadSolutionJson'
   inputs:
     targetType: 'filePath'
     filePath: './scripts/read-solution-json.ps1'
