@@ -42,7 +42,7 @@ jobs:
     inputs:
       contents: ${{ parameters.solutionJsonPath }}
       targetFolder: ${{ parameters.artifactDirectory }}
-      flattenFiles: true
+      flattenFolders: true
     displayName: 'Include solution.json in artifact'
 
   - task: PublishBuildArtifacts@1
