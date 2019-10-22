@@ -1,6 +1,8 @@
 parameters:
   jobProperties: {}
   solutionJsonPath: 'solution.json'
+  solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
+  solutionType: 'Both'
   toolset: 'powerapps-build-tools'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
@@ -21,11 +23,13 @@ jobs:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
   
-#  - template: ../steps/pack-solution.yml
-#    parameters:
-#      solutionJsonPath: ${{ parameters.solutionJsonPath }}
-#      toolset: ${{ parameters.toolset }}
-#      toolsDirectory: ${{ parameters.toolsDirectory }}
+  - template: ../steps/pack-solution.yml
+    parameters:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      solutionOutputFile: ${{ parameters.solutionOutputFile }}
+      solutionType: ${{ parameters.solutionType }}
+      toolset: ${{ parameters.toolset }}
+      toolsDirectory: ${{ parameters.toolsDirectory }}
   
   - task: PublishBuildArtifacts@1
     inputs:
