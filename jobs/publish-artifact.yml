@@ -4,7 +4,7 @@ parameters:
   jobProperties: {}
 
 jobs:
-- job: ${{ coalesce(parameters.jobProperties.name, 'Build') }}
+- job: ${{ coalesce(parameters.jobProperties.name, 'Publish') }}
 
   ${{ if eq(parameters.jobProperties.pool, '') }}:
     pool:
