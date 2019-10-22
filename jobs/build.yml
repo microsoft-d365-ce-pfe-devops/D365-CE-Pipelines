@@ -23,6 +23,10 @@ jobs:
     parameters:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
+
+  - template: '../steps/powershell/read-solution-json.yml'
+    parameters:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
   
   - template: ../steps/pack-solution.yml
     parameters:

@@ -4,10 +4,6 @@ parameters:
   solutionType: 'Both'
 
 steps:
-- template: '../powershell/read-solution-json.yml'
-  parameters:
-    solutionJsonPath: ${{ parameters.solutionJsonPath }}
-
 - task: PowerAppsPackSolution@0
   inputs:
     SolutionSourceFolder: '$(solutionPath)'
