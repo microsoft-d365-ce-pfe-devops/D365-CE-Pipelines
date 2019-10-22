@@ -16,11 +16,11 @@ steps:
 
     nuget install Microsoft.CrmSdk.CoreTools -O $toolsDirectory
     $coreToolsFolder = Get-ChildItem $toolsDirectory `
-    | Where-Object { $_.Name -match 'Microsoft.CrmSdk.CoreTools.' }
+      | Where-Object { $_.Name -match 'Microsoft.CrmSdk.CoreTools.' }
     Move-Item `
       -Path "$coreToolsFolder\\content\\bin\\coretools\\*.*" `
       -Destination "$toolsDirectory\\CoreTools"
-    Remove-Item "$toolsDirectory\\$coreToolsFolder" -Force -Recurse
+    Remove-Item "$coreToolsFolder" -Force -Recurse
   name: 'InstallTools'
   env:
     TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}
