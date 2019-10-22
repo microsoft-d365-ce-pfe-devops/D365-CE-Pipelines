@@ -10,13 +10,14 @@ steps:
         -Raw `
         -Path $env:SOLUTION_JSON_PATH `
       | ConvertFrom-Json
-    Write-Host "##vso[task.setvariable variable=solutionName]$solution.name"
+    Write-Host "##vso[task.setvariable variable=solutionName]$($solution.name)"
 
     If($solution.path) { 
-      $solutionPath = $solution.path
+      $solutionRelativePath = $solution.path
     } Else {
-      $solutionPath = "contents"
+      $solutionRelativePath = "contents"
     }
+    $solutionPath = "$($env:SOLUTION_JSON_PATH -Replace "(.*[/\\])[^/\\]*.json$", "`$1")$solutionRelativePath"
     Write-Host "##vso[task.setvariable variable=solutionPath]$solutionPath"
   env:
     SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
