@@ -1,11 +1,22 @@
+parameters:
+  toolsDirectory: $(Pipeline.Workspace)\tools
+  solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
+  solutionType: 'Both'
+
 steps:
 - powershell: |
-    Start-Process tools/CoreTools/SolutionPackager.exe `
+    Start-Process $env:TOOLS_DIRECTORY/CoreTools/SolutionPackager.exe `
     -ArgumentList `
       "/action: Pack", `
-      "/zipfile: $(build.artifactStagingDirectory)\packedSolution\$(solution.name).zip", `
-      "/folder: $(solution.path)", `
-      "/packagetype: Both" `
+      "/zipfile: $env:SOLUTION_OUTPUT_FILE", `
+      "/folder: $env:SOLUTION_PATH", `
+      "/packagetype: $env:SOLUTION_TYPE" `
     -Wait `
     -NoNewWindow
   displayName: 'Solution Packager: pack solution'
+  env:
+    SOLUTION_NAME: '$(solutionName)'
+    SOLUTION_OUTPUT_FILE: ${{ parameters.solutionOutputFile }}
+    SOLUTION_PATH: '$(solutionPath)'
+    SOLUTION_TYPE: ${{ parameters.solutionType }}
+    TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}
