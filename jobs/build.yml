@@ -25,7 +25,7 @@ jobs:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
 
-  - template: '../steps/powershell/read-solution-json.yml'
+  - template: '../steps/read-solution-json.yml'
     parameters:
       solutionJsonPath: ${{ parameters.solutionJsonPath }}
   
