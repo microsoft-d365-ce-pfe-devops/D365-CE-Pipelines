@@ -1,5 +1,5 @@
 parameters:
-  solutionJsonPath: solution.json
+  solutionJsonPath: '$(Build.SourcesDirectory)\solution.json'
   solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
   solutionType: 'Both'
   toolset: 'powerapps-build-tools' # [ 'powerapps-build-tools' | 'powershell' ]
