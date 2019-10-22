@@ -4,23 +4,9 @@ parameters:
   solutionType: 'Both'
 
 steps:
-- pwsh: |
-    $solution = `
-      Get-Content `
-        -Raw `
-        -Path $env:SOLUTION_JSON_PATH `
-      | ConvertFrom-Json
-    Write-Host "##vso[task.setvariable variable=solutionName]$($solution.name)"
-
-    If($solution.path) { 
-      $solutionRelativePath = $solution.path
-    } Else {
-      $solutionRelativePath = "contents"
-    }
-    $solutionPath = "$($env:SOLUTION_JSON_PATH -Replace "(.*[/\\])[^/\\]*.json$", "`$1")$solutionRelativePath"
-    Write-Host "##vso[task.setvariable variable=solutionPath]$solutionPath"
-  env:
-    SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
+- template: '../powershell/read-solution-json.yml'
+  parameters:
+    solutionJsonPath: ${{ parameters.solutionJsonPath }}
 
 #- task: PowerAppsPackSolution@0
 #  inputs:

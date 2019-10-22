@@ -1,0 +1,11 @@
+parameters:
+  solutionJsonPath: 'solution.json'
+
+steps:
+- task: PowerShell@2
+  name: 'Read-Solution-Json'
+  inputs:
+    targetType: 'filePath'
+    filePath: './scripts/read-solution-json.ps1'
+    arguments:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
