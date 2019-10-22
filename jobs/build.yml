@@ -1,8 +1,9 @@
 parameters:
+  artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
   artifactName: 'packed-solution'
   jobProperties: {}
   solutionJsonPath: 'solution.json'
-  solutionOutputFile: '$(Pipeline.Workspace)\packed-solution\$(solutionName).zip'
+  solutionOutputFile: '$(solutionName).zip'
   solutionType: 'Both'
   toolset: 'powerapps-build-tools'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
@@ -36,8 +37,15 @@ jobs:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
   
+
+  - task: CopyFiles@2
+    inputs:
+      contents: ${{ parameters.solutionJsonPath }}
+      targetFolder: ${{ parameters.artifactDirectory }}
+    displayName: 'Include solution.json in artifact'
+
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: $(Build.ArtifactStagingDirectory)
+      pathtoPublish: ${{ parameters.artifactDirectory }}
       artifactName: ${{ parameters.artifactName }}
     displayName: 'Publish build artifact'
