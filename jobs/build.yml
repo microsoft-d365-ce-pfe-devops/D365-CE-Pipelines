@@ -29,8 +29,8 @@ jobs:
     parameters:
       solutionJsonPath: ${{ parameters.solutionJsonPath }}
       attributes:
-        name: 'solution.name'
-        contentsPath: 'solution.contentsPath'
+      - 'name'
+      - 'contentsPath'
   
   - template: ../steps/pack-solution.yml
     parameters:

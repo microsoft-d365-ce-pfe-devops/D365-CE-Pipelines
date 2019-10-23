@@ -24,9 +24,9 @@ jobs:
     parameters:
       solutionJsonPath: $(Pipeline.Workspace)/${{ parameters.artifactName }}/solution.json
       attributes:
-        packageDescription: 'package.description'
-        packageName: 'package.name'
-        version: 'solution.version'
+      - 'packageDescription'
+      - 'packageName'
+      - 'version'
   
   - powershell: |
       $head = @{ Authorization = "Bearer $(System.AccessToken)" }

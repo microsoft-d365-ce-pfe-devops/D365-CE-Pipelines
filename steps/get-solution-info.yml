@@ -1,6 +1,12 @@
 parameters:
   solutionJsonPath: 'solution.json'
   attributes:
+  - 'contentsPath'
+  - 'name'
+  - 'packageDescription'
+  - 'packageName'
+  - 'version'
+  variableNameMapping:
     # Usage:
     # attributeName: variableName
 
@@ -14,14 +20,10 @@ parameters:
       #   1. solution folder containing unpacked contents
       #   2. solution json file
       #   3. zipped solution archive
-  applyDefaults: 'false'
-    # apply the default values for attributes not specified
-    # if 'false', unspecified attributes will not be retrieved from the solution
-    # note: if the entire "attributes" parameter is omitted, all defaults are used
 
 steps:
 - pwsh: |
-    $applyDefaults = $env:APPLY_DEFAULTS -eq "true"
+    $attributes = $env:ATTRIBUTES.Split(",")
     $defaults = @(
       @{
         environmentValue = $env:CONTENTS_PATH
@@ -51,21 +53,21 @@ steps:
     )
 
     $defaults | ForEach-Object {
-      if ([string]::IsNullOrEmpty($_.environmentValue)) {
-        if ($applyDefaults) {
+      if ($attributes.Contains($_.attributeName)) {
+        if ([string]::IsNullOrEmpty($_.environmentValue)) {
           $variableValue = $_.defaultVariableValue
         } else {
-          $variableValue = ""
+          $variableValue = $_.environmentValue
         }
       } else {
-        $variableValue = $_.environmentValue
+        $variableValue = ""
       }
 
       Write-Host "##vso[task.setvariable variable=attributes.$($_.attributeName)]$variableValue"
     }
   displayName: 'Convert get-solution-info parameters to variables'
   env:
-    APPLY_DEFAULTS: ${{ parameters.applyDefaults }}
+    ATTRIBUTES: ${{ join(',', parameters.attributes) }}
     CONTENTS_PATH: ${{ parameters.attributes.contentsPath }}
     NAME: ${{ parameters.attributes.name }}
     PACKAGE_DESCRIPTION: ${{ parameters.attributes.packageDescription }}
