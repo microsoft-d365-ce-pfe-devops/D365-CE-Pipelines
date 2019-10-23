@@ -3,7 +3,7 @@ parameters:
   artifactName: 'packed-solution'
   jobProperties: {}
   solutionJsonPath: 'solution.json'
-  solutionOutputFile: '$(solutionName).zip'
+  solutionOutputFile: '$(solution.name).zip'
   solutionType: 'Both'
   toolset: 'powerapps-build-tools'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
