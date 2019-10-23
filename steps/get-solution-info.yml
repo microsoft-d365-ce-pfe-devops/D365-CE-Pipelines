@@ -61,7 +61,7 @@ steps:
         $variableValue = $_.environmentValue
       }
 
-      Write-Host "##vso[task=setvariable variable=attributes.($_.attributeName)]$variableValue"
+      Write-Host "##vso[task=setvariable variable=attributes.$($_.attributeName)]$variableValue"
     }
   displayName: 'Convert get-solution-info parameters to variables'
   env:
