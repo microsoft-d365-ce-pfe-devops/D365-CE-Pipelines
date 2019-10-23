@@ -23,14 +23,14 @@ jobs:
   - powershell: |
       $solution = (Get-Content -Raw -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/solution.json" | ConvertFrom-Json)
 
-      If ($solution.packageName -eq $null) {
+      if ($solution.packageName -eq $null) {
         $packageName = $solution.name.ToLower() -Replace '_', '-'
-      } Else {
+      } else {
         $packageName = $solution.packageName
       }
       Write-Host "##vso[task.setvariable variable=package.name]$packageName"
 
-      $description = If($solution.description -eq $null) { "" } Else { $solution.description }
+      $description = If($solution.description -eq $null) { "" } else { $solution.description }
       Write-Host "##vso[task.setvariable variable=package.description]$description"
 
       Expand-Archive `
@@ -63,11 +63,11 @@ jobs:
         If($latestMajorMinor -eq $solutionMajorMinor) {
           Write-Host "Solution major/minor version matches package version. Publishing as patch."
           Write-Host "##vso[task.setvariable variable=package.versionOption]patch"
-        } Else {
+        } else {
           Write-Host "Solution major/minor version has changed. Using solution version."
           $useSolutionVersion = $true
         }
-      } Else {
+      } else {
         Write-Host "Package does not exist. Using solution version."
         $useSolutionVersion = $true
       }

@@ -51,13 +51,13 @@ steps:
     )
 
     $defaults | ForEach-Object {
-      If ([string]::IsNullOrEmpty($_.environmentValue)) {
-        If($applyDefaults) {
+      if ([string]::IsNullOrEmpty($_.environmentValue)) {
+        if ($applyDefaults) {
           $variableValue = $_.defaultVariableValue
-        } Else {
+        } else {
           $variableValue = ""
         }
-      } Else {
+      } else {
         $variableValue = $_.environmentValue
       }
 
@@ -79,45 +79,45 @@ steps:
         -Path $env:SOLUTION_JSON_PATH `
       | ConvertFrom-Json
 
-    If($solution.contentsPath) { 
+    if ($solution.contentsPath) { 
       $solutionRelativePath = $solution.contentsPath
-    } Else {
+    } else {
       $solutionRelativePath = "contents"
     }
     $solutionJsonFolder = $env:SOLUTION_JSON_PATH -Replace "(.*?[/\\]?)[^/\\]*.json$", "`$1"
     $contentsPath = "$solutionJsonFolder$solutionRelativePath"
 
-    If (-Not [string]::IsNullOrEmpty($env:CONTENTS_PATH)) {
+    if (-Not [string]::IsNullOrEmpty($env:CONTENTS_PATH)) {
       Write-Host "##vso[task.setvariable variable=$env:CONTENTS_PATH]$contentsPath"
     }
     
-    If (-Not [string]::IsNullOrEmpty($env:NAME)) {
+    if (-Not [string]::IsNullOrEmpty($env:NAME)) {
       Write-Host "##vso[task.setvariable variable=$env:NAME]$($solution.name)"
     }
 
-    If (-Not [string]::IsNullOrEmpty($env:PACKAGE_DESCRIPTION)) {
-      $description = If($solution.description -eq $null) { "" } Else { $solution.description }
+    if (-Not [string]::IsNullOrEmpty($env:PACKAGE_DESCRIPTION)) {
+      $description = if ($solution.description -eq $null) { "" } else { $solution.description }
       Write-Host "##vso[task.setvariable variable=$env:PACKAGE_DESCRIPTION]$description"
     }
 
-    If (-Not [string]::IsNullOrEmpty($env:PACKAGE_NAME)) {
-      If ($solution.packageName -eq $null) {
+    if (-Not [string]::IsNullOrEmpty($env:PACKAGE_NAME)) {
+      if ($solution.packageName -eq $null) {
         $packageName = $solution.name.ToLower() -Replace '_', '-'
-      } Else {
+      } else {
         $packageName = $solution.packageName
       }
       Write-Host "##vso[task.setvariable variable=$env:PACKAGE_NAME]$packageName"
     }
 
-    If (-Not [string]::IsNullOrEmpty($env:VERSION)) {
-      If (Test-Path $contentsPath) {
+    if (-Not [string]::IsNullOrEmpty($env:VERSION)) {
+      if (Test-Path $contentsPath) {
         $version = (Select-Xml `
           -Path "$contentsPath\Other\Solution.xml" `
           -XPath "/ImportExportXml/SolutionManifest/Version" `
         ).Node.InnerText
-      } Else If (-Not [string]::IsNullOrEmpty($solution.version)) {
+      } elseif (-Not [string]::IsNullOrEmpty($solution.version)) {
         $version = $solution.version
-      } Else {
+      } else {
         Expand-Archive `
           -Path "$solutionJsonFolder$($solution.name).zip" `
           -DestinationPath "$contentsPath"
