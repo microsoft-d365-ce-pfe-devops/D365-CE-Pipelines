@@ -22,7 +22,7 @@ jobs:
   
   - template: ../steps/get-solution-info.yml
     parameters:
-      solutionJsonPath: '$(Pipeline.Workspace)/$(artifactName)/solution.json'
+      solutionJsonPath: $(Pipeline.Workspace)/${{ parameters.artifactName }}/solution.json
       attributes:
         packageDescription: 'package.description'
         packageName: 'package.name'
