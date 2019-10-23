@@ -1,7 +1,7 @@
 parameters:
   artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
   toolsDirectory: $(Pipeline.Workspace)\tools
-  solutionOutputFile: '$(solutionName).zip'
+  solutionOutputFile: '$(solution.name).zip'
   solutionType: 'Both'
 
 steps:
@@ -16,8 +16,8 @@ steps:
     -NoNewWindow
   displayName: 'Solution Packager: pack solution'
   env:
-    SOLUTION_NAME: '$(solutionName)'
+    SOLUTION_NAME: '$(solution.name)'
     SOLUTION_OUTPUT_FILE: ${{ parameters.artifactDirectory }}${{ parameters.solutionOutputFile }}
-    SOLUTION_PATH: '$(solutionPath)'
+    SOLUTION_PATH: '$(solution.contentsPath)'
     SOLUTION_TYPE: ${{ parameters.solutionType }}
     TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}

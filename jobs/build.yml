@@ -25,9 +25,12 @@ jobs:
       toolset: ${{ parameters.toolset }}
       toolsDirectory: ${{ parameters.toolsDirectory }}
 
-  - template: '../steps/get-pack-solution-info.yml'
+  - template: '../steps/get-solution-info.yml'
     parameters:
       solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      attributes:
+        name: 'solution.name'
+        contentsPath: 'solution.contentsPath'
   
   - template: ../steps/pack-solution.yml
     parameters:
