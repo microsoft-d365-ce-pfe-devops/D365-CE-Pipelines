@@ -111,9 +111,9 @@ steps:
 
     If (-Not [string]::IsNullOrEmpty($env:VERSION)) {
       If (Test-Path $contentsPath) {
-        $version = (Select-Xml
-          -Path "$contentsPath\Other\Solution.xml"
-          -XPath "/ImportExportXml/SolutionManifest/Version"
+        $version = (Select-Xml `
+          -Path "$contentsPath\Other\Solution.xml" `
+          -XPath "/ImportExportXml/SolutionManifest/Version" `
         ).Node.InnerText
       } Else If (-Not [string]::IsNullOrEmpty($solution.version)) {
         $version = $solution.version
@@ -121,9 +121,9 @@ steps:
         Expand-Archive `
           -Path "$solutionJsonFolder$($solution.name).zip" `
           -DestinationPath "$contentsPath"
-        $version = (Select-Xml
-          -Path "$contentsPath\solution.xml"
-          -XPath "/ImportExportXml/SolutionManifest/Version"
+        $version = (Select-Xml `
+          -Path "$contentsPath\solution.xml" `
+          -XPath "/ImportExportXml/SolutionManifest/Version" `
         ).Node.InnerText
       }
       Write-Host "##vso[task.setvariable variable=$env:VERSION]$version"
