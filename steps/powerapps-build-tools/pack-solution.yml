@@ -7,6 +7,6 @@ parameters:
 steps:
 - task: PowerAppsPackSolution@0
   inputs:
-    SolutionSourceFolder: '$(solution.path)'
+    SolutionSourceFolder: '$(solution.contentsPath)'
     SolutionOutputFile: ${{ parameters.artifactDirectory }}${{ parameters.solutionOutputFile }}
     SolutionType: ${{ parameters.solutionType }}
