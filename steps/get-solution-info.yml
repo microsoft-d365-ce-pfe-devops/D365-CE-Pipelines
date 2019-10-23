@@ -42,7 +42,7 @@ steps:
       }
       @{
         environmentValue = $env:PACKAGE_NAME
-        attributeName = "package.name"
+        attributeName = "packageName"
         defaultVariableValue = "package.name"
       }
       @{
