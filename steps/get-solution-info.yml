@@ -68,11 +68,12 @@ steps:
   displayName: 'Convert get-solution-info parameters to variables'
   env:
     ATTRIBUTES: ${{ join(',', parameters.attributes) }}
-    CONTENTS_PATH: ${{ parameters.attributes.contentsPath }}
-    NAME: ${{ parameters.attributes.name }}
-    PACKAGE_DESCRIPTION: ${{ parameters.attributes.packageDescription }}
-    PACKAGE_NAME: ${{ parameters.attributes.packageName }}
-    VERSION: ${{ parameters.attributes.version }}
+
+    CONTENTS_PATH: ${{ parameters.variableNameMapping.contentsPath }}
+    NAME: ${{ parameters.variableNameMapping.name }}
+    PACKAGE_DESCRIPTION: ${{ parameters.variableNameMapping.packageDescription }}
+    PACKAGE_NAME: ${{ parameters.variableNameMapping.packageName }}
+    VERSION: ${{ parameters.variableNameMapping.version }}
 
 - pwsh: |
     $solution = `
@@ -135,7 +136,7 @@ steps:
     SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
 
     CONTENTS_PATH: $(attributes.contentsPath)
-    NAME: ${{ parameters.attributes.name }}
-    PACKAGE_DESCRIPTION: ${{ parameters.attributes.packageDescription }}
-    PACKAGE_NAME: ${{ parameters.attributes.packageName }}
-    VERSION: ${{ parameters.attributes.version }}
+    NAME: $(attributes.name)
+    PACKAGE_DESCRIPTION: $(attributes.packageDescription)
+    PACKAGE_NAME: $(attributes.packageName)
+    VERSION: $(attributes.version)
