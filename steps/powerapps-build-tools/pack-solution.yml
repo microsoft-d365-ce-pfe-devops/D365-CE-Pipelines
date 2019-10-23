@@ -1,12 +1,12 @@
 parameters:
   solutionJsonPath: 'solution.json'
   artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
-  solutionOutputFile: '$(solutionName).zip'
+  solutionOutputFile: '$(solution.name).zip'
   solutionType: 'Both'
 
 steps:
 - task: PowerAppsPackSolution@0
   inputs:
-    SolutionSourceFolder: '$(solutionPath)'
+    SolutionSourceFolder: '$(solution.path)'
     SolutionOutputFile: ${{ parameters.artifactDirectory }}${{ parameters.solutionOutputFile }}
     SolutionType: ${{ parameters.solutionType }}
