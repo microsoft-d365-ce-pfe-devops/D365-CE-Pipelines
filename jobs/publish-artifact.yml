@@ -19,31 +19,14 @@ jobs:
 
   - download: current
     artifact: ${{ parameters.artifactName }}
-
-  - powershell: |
-      $solution = (Get-Content -Raw -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/solution.json" | ConvertFrom-Json)
-
-      if ($solution.packageName -eq $null) {
-        $packageName = $solution.name.ToLower() -Replace '_', '-'
-      } else {
-        $packageName = $solution.packageName
-      }
-      Write-Host "##vso[task.setvariable variable=package.name]$packageName"
-
-      $description = If($solution.description -eq $null) { "" } else { $solution.description }
-      Write-Host "##vso[task.setvariable variable=package.description]$description"
-
-      Expand-Archive `
-        -Path "$(Pipeline.Workspace)/$env:ARTIFACT_NAME/$($solution.name).zip" `
-        -DestinationPath "$(Pipeline.Workspace)/solutionContents"
-      $version = (Select-Xml `
-        -Path "$(Pipeline.Workspace)/solutionContents/solution.xml" `
-        -XPath "/ImportExportXml/SolutionManifest/Version"
-      ).Node.InnerText
-      Write-Host "##vso[task.setvariable variable=solution.version]$version"
-    env:
-      ARTIFACT_NAME: ${{ parameters.artifactName }}
-    displayName: 'Get package properties from solution'
+  
+  - template: ../steps/get-solution-info.yml
+    parameters:
+      solutionJsonPath: '$(Pipeline.Workspace)/$(artifactName)/solution.json'
+      attributes:
+        packageDescription: 'package.description'
+        packageName: 'package.name'
+        version: 'solution.version'
   
   - powershell: |
       $head = @{ Authorization = "Bearer $(System.AccessToken)" }
