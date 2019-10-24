@@ -34,7 +34,7 @@ steps:
           break;
         }
       }
-      Write-Host "exit code: " + $process.ExitCode"
+      Write-Host "exit code:" + $process.ExitCode
     displayName: "Solution Packager: pack solution"
     env:
       SOLUTION_NAME: "$(solution.name)"
