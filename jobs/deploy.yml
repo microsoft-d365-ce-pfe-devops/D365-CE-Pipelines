@@ -32,6 +32,7 @@ jobs:
           parameters:
             attributes:
             - 'name'
+            solutionJsonPath: '$(Pipeline.Workspace)\packed-solution\solution.json'
 
         - template: ../steps/import-solution.yml
           parameters:
