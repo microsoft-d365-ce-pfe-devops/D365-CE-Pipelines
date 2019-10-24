@@ -1,11 +1,16 @@
 parameters:
+  installPowershellTools: 'true'
   powerAppsEnvironment:
     connectionString: '$(environment.connectionString)'
   solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
 steps:
-- pwsh: |    
+- ${{ if eq(parameters.installPowershellTools, 'true') }}:
+  - pwsh: |
+      Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
+    name: 'InstallPowerShellTools'
+- pwsh: |
     $connection = Get-CrmConnection `
       -ConnectionString $env:CONNECTION_STRING
     

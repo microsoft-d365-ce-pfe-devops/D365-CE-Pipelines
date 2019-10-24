@@ -28,11 +28,6 @@ jobs:
     runOnce:
       deploy:
         steps:
-        - template: ../steps/install-tools.yml
-          parameters:
-            toolset: ${{ parameters.toolset }}
-            toolsDirectory: ${{ parameters.toolsDirectory }}
-
         - template: ../steps/import-solution.yml
           parameters:
             powerAppsEnvironment: ${{ parameters.environmentDetails }}
