@@ -7,10 +7,10 @@ parameters:
 
 steps:
 - ${{ if eq(parameters.installPowershellTools, 'true') }}:
-  - pwsh: |
+  - powershell: |
       Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
     name: 'InstallPowerShellTools'
-- pwsh: |
+- powershell: |
     $connection = Get-CrmConnection `
       -ConnectionString $env:CONNECTION_STRING
     
