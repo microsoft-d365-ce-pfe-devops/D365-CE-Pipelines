@@ -7,7 +7,7 @@ parameters:
 steps:
   - powershell: |
       $processInfo = New-Object System.Diagnostics.ProcessStartInfo
-      $processInfo.FileName = "Tools\CoreTools\SolutionPackager.exe"
+      $processInfo.FileName = "$env:TOOLS_DIRECTORY\CoreTools\SolutionPackager.exe"
       $processInfo.RedirectStandardError = $true
       $processInfo.RedirectStandardOutput = $true
       $processInfo.UseShellExecute = $false
