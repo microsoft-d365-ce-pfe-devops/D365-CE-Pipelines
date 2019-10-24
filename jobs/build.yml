@@ -27,10 +27,11 @@ jobs:
 
   - template: '../steps/get-solution-info.yml'
     parameters:
-      solutionJsonPath: ${{ parameters.solutionJsonPath }}
       attributes:
       - 'name'
       - 'contentsPath'
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      toolset: ${{ parameters.toolset }}
   
   - template: ../steps/pack-solution.yml
     parameters:
