@@ -1,7 +1,9 @@
 parameters:
   artifactName: 'packed-solution'
   feed: ''
-  jobProperties: {}
+  jobProperties:
+    dependsOn: 'Build'
+    condition: 'succeeded(''Build'')'
 
 jobs:
 - job: ${{ coalesce(parameters.jobProperties.name, 'Publish') }}
