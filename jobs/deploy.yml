@@ -8,7 +8,7 @@ parameters:
     serviceConnection: '$(environment.serviceConnection)'
   solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name).zip'
   toolset: 'powershell'
-  toolsDirectory: ${{ parameters.toolsDirectory }}
+  toolsDirectory: '$(Pipeline.Workspace)\tools'
 
 jobs:
 - deployment: ${{ coalesce(parameters.jobProperties.name, 'Deploy') }}
