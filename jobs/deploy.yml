@@ -1,0 +1,50 @@
+parameters:
+  artifactName: 'packed-solution'
+  environment: ''
+  jobProperties: {}
+
+jobs:
+- deployment: ${{ coalesce(parameters.jobProperties.name, 'Deploy') }}
+
+  ${{ if eq(parameters.jobProperties.pool, '') }}:
+    pool:
+      vmImage: 'windows-latest'
+  
+  ${{ each pair in parameters.jobProperties }}:
+    ${{ if not(in(pair.key, 'name', 'pool')) }}:
+      ${{ pair.key }}: ${{ pair.value }}
+  
+  environment: ${{ parameters.environment }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'drop'
+            downloadPath: '$(System.ArtifactsDirectory)'
+        
+        - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
+          displayName: 'Install Microsoft.Xrm.Data.PowerShell'
+
+        - powershell: |
+            Write-Host `
+              ("AuthType = Office365;" + `
+                "Username = $(serviceAccount.upn);" + `
+                "Password = $(serviceAccount.password);" + `
+                "Url = https://$(environment.uniqueName).crm.dynamics.com")
+            
+            $connection = Get-CrmConnection `
+              -ConnectionString `
+                ("AuthType = Office365;" + `
+                "Username = $(serviceAccount.upn);" + `
+                "Password = $(serviceAccount.password);" + `
+                "Url = https://$(environment.uniqueName).crm.dynamics.com")
+
+            Import-CrmSolutionAsync `
+              -BlockUntilImportComplete `
+              -conn $connection `
+              -SolutionFilePath $(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip
+          displayName: 'Import solution'
