@@ -28,6 +28,11 @@ jobs:
     runOnce:
       deploy:
         steps:
+        - template: ../steps/get-solution-info.yml
+          parameters:
+            attributes:
+            - 'name'
+
         - template: ../steps/import-solution.yml
           parameters:
             powerAppsEnvironment: ${{ parameters.environmentDetails }}
