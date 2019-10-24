@@ -10,6 +10,7 @@ steps:
   - powershell: |
       Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
     name: 'InstallPowerShellTools'
+
 - powershell: |
     $connection = Get-CrmConnection `
       -ConnectionString $env:CONNECTION_STRING
