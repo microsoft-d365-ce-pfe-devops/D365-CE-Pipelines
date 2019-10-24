@@ -12,6 +12,8 @@ steps:
     name: 'InstallPowerShellTools'
 
 - powershell: |
+    Write-Host "Connection String: $env:CONNECTION_STRING"
+
     $connection = Get-CrmConnection `
       -ConnectionString $env:CONNECTION_STRING
     
