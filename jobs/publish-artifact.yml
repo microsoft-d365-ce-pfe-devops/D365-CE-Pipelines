@@ -1,0 +1,79 @@
+parameters:
+  artifactName: 'packed-solution'
+  feed: ''
+  jobProperties: {}
+
+jobs:
+- job: ${{ coalesce(parameters.jobProperties.name, 'Publish') }}
+
+  ${{ if eq(parameters.jobProperties.pool, '') }}:
+    pool:
+      vmImage: 'ubuntu-latest'
+  
+  ${{ each pair in parameters.jobProperties }}:
+    ${{ if not(in(pair.key, 'name', 'pool')) }}:
+      ${{ pair.key }}: ${{ pair.value }}
+
+  steps:
+  - checkout: none
+
+  - download: current
+    artifact: ${{ parameters.artifactName }}
+  
+  - template: ../steps/get-solution-info.yml
+    parameters:
+      solutionJsonPath: $(Pipeline.Workspace)/${{ parameters.artifactName }}/solution.json
+      attributes:
+      - 'packageDescription'
+      - 'packageName'
+      - 'version'
+  
+  - powershell: |
+      $head = @{ Authorization = "Bearer $(System.AccessToken)" }
+      $feedsUrl = "$(System.TeamFoundationCollectionUri)" -Replace "^https://dev\.", "https://feeds.dev."
+      $url = "$($feedsUrl)_apis/packaging/Feeds/$env:FEED/packages?packageNameQuery=$env:PACKAGE_NAME&api-version=5.1-preview.1"
+      $packages = Invoke-RestMethod -Uri $url -Method Get -Headers $head -ContentType application/json
+      $package = $packages.value.Where({ $_.name -eq $env:PACKAGE_NAME })
+
+      $solutionVersion = $env:SOLUTION_VERSION
+      $solutionMajorMinor = $solutionVersion -Replace "^([0-9]*\.[0-9]*).*", "`$1"
+
+      If($package.Count -gt 0) {
+        $latestVersion = $package.versions[0].version
+        Write-Host "Package current latest version: $latestVersion"
+        
+        $latestMajorMinor = $latestVersion -Replace "^([0-9]*\.[0-9]*).*", "`$1"
+        If($latestMajorMinor -eq $solutionMajorMinor) {
+          Write-Host "Solution major/minor version matches package version. Publishing as patch."
+          Write-Host "##vso[task.setvariable variable=package.versionOption]patch"
+        } else {
+          Write-Host "Solution major/minor version has changed. Using solution version."
+          $useSolutionVersion = $true
+        }
+      } else {
+        Write-Host "Package does not exist. Using solution version."
+        $useSolutionVersion = $true
+      }
+
+      If($useSolutionVersion) {
+        $packageVersion = "$solutionMajorMinor.0"
+        Write-Host "##vso[task.setvariable variable=package.versionOption]custom"
+        Write-Host "##vso[task.setvariable variable=package.version]$packageVersion"
+      }
+
+    env:
+      FEED: ${{ parameters.feed }}
+      PACKAGE_NAME: $(package.name)
+      SOLUTION_VERSION: $(solution.version)
+    displayName: 'Set package version'
+
+  - task: UniversalPackages@0
+    displayName: 'Publish package'
+    inputs:
+      command: 'publish'
+      publishDirectory: '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
+      feedsToUsePublish: 'internal'
+      vstsFeedPublish: '${{ parameters.feed }}'
+      vstsFeedPackagePublish: '$(package.name)'
+      versionOption: '$(package.versionOption)'
+      versionPublish: '$(package.version)'

@@ -1,0 +1,8 @@
+parameters:
+  toolset: 'powerapps-build-tools' # [ 'powerapps-build-tools' | 'powershell' ]
+  toolsDirectory: '$(Pipeline.Workspace)\tools' # only relevant if toolset = 'powershell'
+
+steps:
+- template: ${{ parameters.toolset }}/install-tools.yml
+  parameters:
+    toolsDirectory: ${{ parameters.toolsDirectory }}

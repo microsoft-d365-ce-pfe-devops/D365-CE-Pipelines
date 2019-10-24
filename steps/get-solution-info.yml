@@ -1,0 +1,142 @@
+parameters:
+  solutionJsonPath: 'solution.json'
+  attributes:
+  - 'contentsPath'
+  - 'name'
+  - 'packageDescription'
+  - 'packageName'
+  - 'version'
+  variableNameMapping:
+    # Usage:
+    # attributeName: variableName
+
+    # Defaults:
+    contentsPath: 'solution.contentsPath'
+    name: 'solution.name'
+    packageDescription: 'package.description'
+    packageName: 'package.name'
+    version: 'solution.version'
+      # checks three places for version (priority order)
+      #   1. solution folder containing unpacked contents
+      #   2. solution json file
+      #   3. zipped solution archive
+
+steps:
+- pwsh: |
+    $attributes = $env:ATTRIBUTES.Split(",")
+    $defaults = @(
+      @{
+        environmentValue = $env:CONTENTS_PATH
+        attributeName = "contentsPath"
+        defaultVariableValue = "solution.contentsPath"
+      }
+      @{
+        environmentValue = $env:NAME
+        attributeName = "name"
+        defaultVariableValue = "solution.name"
+      }
+      @{
+        environmentValue = $env:PACKAGE_DESCRIPTION
+        attributeName = "packageDescription"
+        defaultVariableValue = "package.description"
+      }
+      @{
+        environmentValue = $env:PACKAGE_NAME
+        attributeName = "packageName"
+        defaultVariableValue = "package.name"
+      }
+      @{
+        environmentValue = $env:VERSION
+        attributeName = "version"
+        defaultVariableValue = "solution.version"
+      }
+    )
+
+    $defaults | ForEach-Object {
+      if ($attributes.Contains($_.attributeName)) {
+        if ([string]::IsNullOrEmpty($_.environmentValue)) {
+          $variableValue = $_.defaultVariableValue
+        } else {
+          $variableValue = $_.environmentValue
+        }
+      } else {
+        $variableValue = ""
+      }
+
+      Write-Host "##vso[task.setvariable variable=attributes.$($_.attributeName)]$variableValue"
+    }
+  displayName: 'Convert get-solution-info parameters to variables'
+  env:
+    ATTRIBUTES: ${{ join(',', parameters.attributes) }}
+
+    CONTENTS_PATH: ${{ parameters.variableNameMapping.contentsPath }}
+    NAME: ${{ parameters.variableNameMapping.name }}
+    PACKAGE_DESCRIPTION: ${{ parameters.variableNameMapping.packageDescription }}
+    PACKAGE_NAME: ${{ parameters.variableNameMapping.packageName }}
+    VERSION: ${{ parameters.variableNameMapping.version }}
+
+- pwsh: |
+    $solution = `
+      Get-Content `
+        -Raw `
+        -Path $env:SOLUTION_JSON_PATH `
+      | ConvertFrom-Json
+
+    if ($solution.contentsPath) { 
+      $solutionRelativePath = $solution.contentsPath
+    } else {
+      $solutionRelativePath = "contents"
+    }
+    $solutionJsonFolder = $env:SOLUTION_JSON_PATH -Replace "(.*?[/\\]?)[^/\\]*.json$", "`$1"
+    $contentsPath = "$solutionJsonFolder$solutionRelativePath"
+
+    if (-Not [string]::IsNullOrEmpty($env:CONTENTS_PATH)) {
+      Write-Host "##vso[task.setvariable variable=$env:CONTENTS_PATH]$contentsPath"
+    }
+    
+    if (-Not [string]::IsNullOrEmpty($env:NAME)) {
+      Write-Host "##vso[task.setvariable variable=$env:NAME]$($solution.name)"
+    }
+
+    if (-Not [string]::IsNullOrEmpty($env:PACKAGE_DESCRIPTION)) {
+      $description = if ($solution.description -eq $null) { "" } else { $solution.description }
+      Write-Host "##vso[task.setvariable variable=$env:PACKAGE_DESCRIPTION]$description"
+    }
+
+    if (-Not [string]::IsNullOrEmpty($env:PACKAGE_NAME)) {
+      if ($solution.packageName -eq $null) {
+        $packageName = $solution.name.ToLower() -Replace '_', '-'
+      } else {
+        $packageName = $solution.packageName
+      }
+      Write-Host "##vso[task.setvariable variable=$env:PACKAGE_NAME]$packageName"
+    }
+
+    if (-Not [string]::IsNullOrEmpty($env:VERSION)) {
+      if (Test-Path $contentsPath) {
+        $version = (Select-Xml `
+          -Path "$contentsPath\Other\Solution.xml" `
+          -XPath "/ImportExportXml/SolutionManifest/Version" `
+        ).Node.InnerText
+      } elseif (-Not [string]::IsNullOrEmpty($solution.version)) {
+        $version = $solution.version
+      } else {
+        Expand-Archive `
+          -Path "$solutionJsonFolder$($solution.name).zip" `
+          -DestinationPath "$contentsPath"
+        $version = (Select-Xml `
+          -Path "$contentsPath\solution.xml" `
+          -XPath "/ImportExportXml/SolutionManifest/Version" `
+        ).Node.InnerText
+      }
+      Write-Host "##vso[task.setvariable variable=$env:VERSION]$version"
+    }
+  name: 'ReadSolutionJson'
+  env:
+    SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
+
+    CONTENTS_PATH: $(attributes.contentsPath)
+    NAME: $(attributes.name)
+    PACKAGE_DESCRIPTION: $(attributes.packageDescription)
+    PACKAGE_NAME: $(attributes.packageName)
+    VERSION: $(attributes.version)

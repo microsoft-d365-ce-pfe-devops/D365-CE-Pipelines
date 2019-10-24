@@ -1,0 +1,54 @@
+parameters:
+  artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
+  artifactName: 'packed-solution'
+  jobProperties: {}
+  solutionJsonPath: 'solution.json'
+  solutionOutputFile: '$(solution.name).zip'
+  solutionType: 'Both'
+  toolset: 'powerapps-build-tools'
+  toolsDirectory: '$(Pipeline.Workspace)\tools'
+
+jobs:
+- job: ${{ coalesce(parameters.jobProperties.name, 'Build') }}
+
+  ${{ if eq(parameters.jobProperties.pool, '') }}:
+    pool:
+      vmImage: 'windows-latest'
+  
+  ${{ each pair in parameters.jobProperties }}:
+    ${{ if not(in(pair.key, 'name', 'pool')) }}:
+      ${{ pair.key }}: ${{ pair.value }}
+
+  steps:
+  - template: ../steps/install-tools.yml
+    parameters:
+      toolset: ${{ parameters.toolset }}
+      toolsDirectory: ${{ parameters.toolsDirectory }}
+
+  - template: '../steps/get-solution-info.yml'
+    parameters:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      attributes:
+      - 'name'
+      - 'contentsPath'
+  
+  - template: ../steps/pack-solution.yml
+    parameters:
+      solutionJsonPath: ${{ parameters.solutionJsonPath }}
+      solutionOutputFile: ${{ parameters.solutionOutputFile }}
+      solutionType: ${{ parameters.solutionType }}
+      toolset: ${{ parameters.toolset }}
+      toolsDirectory: ${{ parameters.toolsDirectory }}
+
+  - task: CopyFiles@2
+    inputs:
+      contents: ${{ parameters.solutionJsonPath }}
+      targetFolder: ${{ parameters.artifactDirectory }}
+      flattenFolders: true
+    displayName: 'Include solution.json in artifact'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: ${{ parameters.artifactDirectory }}
+      artifactName: ${{ parameters.artifactName }}
+    displayName: 'Publish build artifact'

@@ -1,0 +1,16 @@
+parameters:
+  artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
+  solutionJsonPath: 'solution.json'
+  solutionOutputFile: '$(solutionName).zip'
+  solutionType: 'Both'
+  toolset: 'powerapps-build-tools' # [ 'powerapps-build-tools' | 'powershell' ]
+  toolsDirectory: '$(Pipeline.Workspace)\tools' # only relevant if toolset = 'powershell'
+
+steps:
+- template: ${{ parameters.toolset }}/pack-solution.yml
+  parameters:
+    artifactDirectory: ${{ parameters.artifactDirectory }}
+    solutionJsonPath: ${{ parameters.solutionJsonPath }}
+    solutionOutputFile: ${{ parameters.solutionOutputFile }}
+    solutionType: ${{ parameters.solutionType }}
+    toolsDirectory: ${{ parameters.toolsDirectory }}

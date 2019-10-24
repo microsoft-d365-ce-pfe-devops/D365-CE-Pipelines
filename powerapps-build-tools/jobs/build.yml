@@ -1,0 +1,37 @@
+parameters:
+  name: ''
+  pool: {}
+  solutionPath: ''
+  solutionName: ''
+  solutionType: 'Both'
+  artifactName: 'solution-artifact'
+
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}
+  
+  steps:
+
+  - template: ../steps/install-powerapps-tools.yml 
+
+  - task: PowerAppsPackSolution@0
+    inputs:
+      SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
+      SolutionOutputFile: '$(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}.zip'
+      SolutionType: ${{ parameters.solutionType }}
+
+  - ${{ if eq(parameters.solutionType, 'Unmanaged') }}:
+    - publish: $(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}.zip
+      artifact: ${{ parameters.artifactName }}
+      displayName: "Publish pipeline artifact - ${{ parameters.solutionName }}.zip as ${{ parameters.artifactName }}"
+
+  - ${{ if eq(parameters.solutionType, 'Managed') }}:
+    - publish: $(Pipeline.Workspace)\packed-solutions\${{ parameters.solutionName }}_managed.zip
+      artifact: ${{ parameters.artifactName }}
+      displayName: "Publish pipeline artifact - ${{ parameters.solutionName }}_managed.zip as ${{ parameters.artifactName }}"
+
+  - ${{ if eq(parameters.solutionType, 'Both') }}:
+    - publish: $(Pipeline.Workspace)\packed-solutions\
+      artifact: ${{ parameters.artifactName }}
+      displayName: "Publish pipeline artifact - ${{ parameters.solutionName }} as ${{ parameters.artifactName }} managed and unmanaged"

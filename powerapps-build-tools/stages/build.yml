@@ -1,0 +1,34 @@
+parameters:
+  artifactName: 'solution'
+  name: 'Build_Solution'
+  solutionName: ''
+  solutionPath: 'xml'
+  vmImage: 'windows-latest'
+
+stages:
+
+- stage: ${{ parameters.name }}
+  jobs:
+  - job:
+    displayName: "Build Solution"
+  
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    
+    steps:
+    - template: ../steps/install-powerapps-tools.yml
+
+    - task: PowerAppsPackSolution@0
+      inputs:
+        SolutionSourceFolder: '$(Build.SourcesDirectory)\${{ parameters.solutionPath }}'
+        SolutionOutputFile: '$(Pipeline.Workspace)\artifact\${{ parameters.solutionName }}.zip'
+        SolutionType: Both
+    
+    - task: CopyFiles@2
+      inputs:
+        sourceFolder: '${{ parameters.solutionPath }}/..'
+        contents: 'solution.json'
+        targetFolder: $(Pipeline.Workspace)\artifact
+      
+    - publish: '$(Pipeline.Workspace)\artifact'
+      artifact: ${{ parameters.artifactName }}
