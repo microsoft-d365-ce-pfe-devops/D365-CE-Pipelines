@@ -1,23 +1,44 @@
 parameters:
   artifactDirectory: '$(Pipeline.Workspace)\packed-solution\'
   toolsDirectory: $(Pipeline.Workspace)\tools
-  solutionOutputFile: '$(solution.name).zip'
-  solutionType: 'Both'
+  solutionOutputFile: "$(solution.name).zip"
+  solutionType: "Both"
 
 steps:
-- powershell: |
-    Start-Process $env:TOOLS_DIRECTORY/CoreTools/SolutionPackager.exe `
-    -ArgumentList `
-      "/action: Pack", `
-      "/zipfile: $env:SOLUTION_OUTPUT_FILE", `
-      "/folder: $env:SOLUTION_PATH", `
-      "/packagetype: $env:SOLUTION_TYPE" `
-    -Wait `
-    -NoNewWindow
-  displayName: 'Solution Packager: pack solution'
-  env:
-    SOLUTION_NAME: '$(solution.name)'
-    SOLUTION_OUTPUT_FILE: ${{ parameters.artifactDirectory }}${{ parameters.solutionOutputFile }}
-    SOLUTION_PATH: '$(solution.contentsPath)'
-    SOLUTION_TYPE: ${{ parameters.solutionType }}
-    TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}
+  - powershell: |
+      $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+      $processInfo.FileName = "Tools\CoreTools\SolutionPackager.exe"
+      $processInfo.RedirectStandardError = $true
+      $processInfo.RedirectStandardOutput = $true
+      $processInfo.UseShellExecute = $false
+      $processInfo.Arguments = `
+        "/action: Pack", `
+        "/zipfile: $env:SOLUTION_OUTPUT_FILE", `
+        "/folder: $env:SOLUTION_PATH", `
+        "/packagetype: $env:SOLUTION_TYPE" ` 
+      $process = New-Object System.Diagnostics.Process
+      $process.StartInfo = $processInfo
+      $process.Start() | Out-Null
+      $process.WaitForExit()
+      $stdout = $process.StandardOutput.ReadToEnd()
+      $stderr = $process.StandardError.ReadToEnd()
+      # Actually throw an error instead of passing error output to stdout
+      switch ($process.ExitCode) {
+        "1" {
+          Write-Error "Stdout: $stdout"
+          Write-Error "Stderr: $stderr"
+          break;
+        }
+        default {
+          Write-Host "Stdout: $stdout"
+          break;
+        }
+      }
+      Write-Host "exit code: " + $process.ExitCode"
+    displayName: "Solution Packager: pack solution"
+    env:
+      SOLUTION_NAME: "$(solution.name)"
+      SOLUTION_OUTPUT_FILE: ${{ parameters.artifactDirectory }}${{ parameters.solutionOutputFile }}
+      SOLUTION_PATH: "$(solution.contentsPath)"
+      SOLUTION_TYPE: ${{ parameters.solutionType }}
+      TOOLS_DIRECTORY: ${{ parameters.toolsDirectory }}
