@@ -6,7 +6,7 @@ parameters:
   powerAppsEnvironment:
     connectionString: '$(environment.connectionString)'
     serviceConnection: '$(environment.serviceConnection)'
-  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name).zip'
+  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
   toolset: 'powershell'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
