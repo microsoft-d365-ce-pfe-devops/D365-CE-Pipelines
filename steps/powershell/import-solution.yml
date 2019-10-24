@@ -1,0 +1,19 @@
+parameters:
+  powerAppsEnvironment:
+    connectionString: '$(environment.connectionString)'
+  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
+  toolsDirectory: '$(Pipeline.Workspace)\tools'
+
+steps:
+- pwsh: |    
+    $connection = Get-CrmConnection `
+      -ConnectionString $env:CONNECTION_STRING
+    
+    Import-CrmSolutionAsync `
+      -BlockUntilImportComplete `
+      -conn $connection `
+      -SolutionFilePath $env:SOLUTION_ZIP_PATH
+  name: 'ImportSolution'
+  env:
+    CONNECTION_STRING: ${{ parameters.powerAppsEnvironment.connectionString }}
+    SOLUTION_ZIP_PATH: ${{ parameters.solutionZipPath }}

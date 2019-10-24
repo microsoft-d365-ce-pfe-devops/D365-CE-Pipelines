@@ -1,0 +1,20 @@
+parameters:
+  powerAppsEnvironment:
+    serviceConnection: '$(environment.serviceConnection)'    
+  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
+  convertToManaged: 'false'
+  overwriteUnmanagedCustomizations: 'true'
+  holdingSolution: 'false'
+  skipProductUpdateDependencies: 'true'
+  publishWorkflows: 'true'
+
+steps:
+- task: PowerAppsImportSolution@0
+  inputs:
+    PowerAppsEnvironment: ${{ parameters.powerAppsEnvironment.serviceConnection }}
+    SolutionInputFile: ${{ parameters.solutionZipPath }}
+    ConvertToManaged: ${{ parameters.convertToManaged }}
+    OverwriteUnmanagedCustomizations: ${{ parameters.overwriteUnmanagedCustomizations }}
+    HoldingSolution: ${{ parameters.holdingSolution }}
+    SkipProductUpdateDependencies: ${{ parameters.skipProductUpdateDependencies }}
+    PublishWorkflows: ${{ parameters.publishWorkflows }}

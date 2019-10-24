@@ -1,7 +1,14 @@
 parameters:
-  artifactName: 'packed-solution'
   environment: ''
-  jobProperties: {}
+  jobProperties:
+    dependsOn: 'Build'
+    condition: 'succeeded(''Build'')'
+  powerAppsEnvironment:
+    connectionString: '$(environment.connectionString)'
+    serviceConnection: '$(environment.serviceConnection)'
+  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name).zip'
+  toolset: 'powershell'
+  toolsDirectory: ${{ parameters.toolsDirectory }}
 
 jobs:
 - deployment: ${{ coalesce(parameters.jobProperties.name, 'Deploy') }}
@@ -10,41 +17,25 @@ jobs:
     pool:
       vmImage: 'windows-latest'
   
+  ${{ if eq(parameters.jobProperties.environment, '') }}:
+    environment: ${{ parameters.environment }}
+
   ${{ each pair in parameters.jobProperties }}:
     ${{ if not(in(pair.key, 'name', 'pool')) }}:
       ${{ pair.key }}: ${{ pair.value }}
-  
-  environment: ${{ parameters.environment }}
+
   strategy:
     runOnce:
       deploy:
         steps:
-        - task: DownloadBuildArtifacts@0
-          inputs:
-            buildType: 'current'
-            downloadType: 'single'
-            artifactName: 'drop'
-            downloadPath: '$(System.ArtifactsDirectory)'
-        
-        - powershell: Install-Module Microsoft.Xrm.Data.Powershell -Scope CurrentUser -Force
-          displayName: 'Install Microsoft.Xrm.Data.PowerShell'
+        - template: ../steps/install-tools.yml
+          parameters:
+            toolset: ${{ parameters.toolset }}
+            toolsDirectory: ${{ parameters.toolsDirectory }}
 
-        - powershell: |
-            Write-Host `
-              ("AuthType = Office365;" + `
-                "Username = $(serviceAccount.upn);" + `
-                "Password = $(serviceAccount.password);" + `
-                "Url = https://$(environment.uniqueName).crm.dynamics.com")
-            
-            $connection = Get-CrmConnection `
-              -ConnectionString `
-                ("AuthType = Office365;" + `
-                "Username = $(serviceAccount.upn);" + `
-                "Password = $(serviceAccount.password);" + `
-                "Url = https://$(environment.uniqueName).crm.dynamics.com")
-
-            Import-CrmSolutionAsync `
-              -BlockUntilImportComplete `
-              -conn $connection `
-              -SolutionFilePath $(System.ArtifactsDirectory)\drop\packedSolution\$(solution.name)_managed.zip
-          displayName: 'Import solution'
+        - template: ../steps/import-solution.yml
+          parameters:
+            powerAppsEnvironment: ${{ parameters.environmentDetails }}
+            solutionZipPath: ${{ parameters.solutionZipPath }}
+            toolset: ${{ parameters.toolset }}
+            toolsDirectory: ${{ parameters.toolsDirectory }}

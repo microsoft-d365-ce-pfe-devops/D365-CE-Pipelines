@@ -1,0 +1,14 @@
+parameters:
+  powerAppsEnvironment:
+    connectionString: '$(environment.connectionString)'
+    serviceConnection: '$(environment.serviceConnection)'
+  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name).zip'
+  toolset: 'powershell' # [ 'powerapps-build-tools' | 'powershell' ]
+  toolsDirectory: '$(Pipeline.Workspace)\tools' # only relevant if toolset = 'powershell'
+
+steps:
+- template: ${{ parameters.toolset }}/import-solution.yml
+  parameters:
+    environmentDetails: ${{ parameters.environmentDetails }}
+    solutionZipPath: ${{ parameters.solutionZipFile }}
+    toolsDirectory: ${{ parameters.toolsDirectory }}
