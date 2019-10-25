@@ -53,7 +53,7 @@ jobs:
               solutionJsonPath: '$(solution.folder)\solution.json'
         
         - ${{ if eq(parameters.solution.artifactName, '') }}:
-          - task: UniversalPackage
+          - task: UniversalPackages@0
             inputs:
               command: 'download'
               downloadDirectory: '$(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}'
