@@ -4,8 +4,9 @@ parameters:
     dependsOn: 'Build'
     condition: 'succeeded(''Build'')'
     # Use these to deploy from a package feed
-    # dependsOn: 'Publish'
-    # condition: 'succeeded(''Publish'')'
+    # dependsOn:
+    # - 'Publish'
+    # - 'Build'
   powerAppsEnvironment:
     connectionString: '$(environment.connectionString)'
     serviceConnection: '$(environment.serviceConnection)'
