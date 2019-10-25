@@ -56,7 +56,7 @@ jobs:
           - task: UniversalPackages@0
             inputs:
               command: 'download'
-              downloadDirectory: '$(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}'
+              downloadDirectory: '$(solution.folder)'
               feedsToUse: 'internal'
               vstsFeed: ${{ parameters.solution.feed }}
               vstsFeedPackage: ${{ parameters.solution.package }}
