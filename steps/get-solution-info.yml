@@ -72,7 +72,7 @@ steps:
           $nameMapping.env
         }
       Write-Host "`$variableName = $variableName"
-      
+
       Write-Host "##vso[task.setvariable variable=$variableName]$value"
       if ($outputs -contains $attribute) {
         Write-Host "##vso[task.setvariable variable=$variableName;isOutput=true]$value"
@@ -94,16 +94,16 @@ steps:
     $contentsPath = "$solutionFolder$solutionRelativePath"
 
     if (-Not [string]::IsNullOrEmpty($env:CONTENTS_PATH)) {
-      Set-PipelineVariable "contentsPath", $contentsPath
+      Set-PipelineVariable "contentsPath" $contentsPath
     }
     
     if (-Not [string]::IsNullOrEmpty($env:NAME)) {
-      Set-PipelineVariable "name", $solution.name
+      Set-PipelineVariable "name" $solution.name
     }
 
     if (-Not [string]::IsNullOrEmpty($env:PACKAGE_DESCRIPTION)) {
       $description = if ($solution.description -eq $null) { "" } else { $solution.description }
-      Set-PipelineVariable "packageDescription", $description
+      Set-PipelineVariable "packageDescription" $description
     }
 
     if (-Not [string]::IsNullOrEmpty($env:PACKAGE_NAME)) {
@@ -112,7 +112,7 @@ steps:
       } else {
         $packageName = $solution.packageName
       }
-      Set-PipelineVariable "packageName", $packageName
+      Set-PipelineVariable "packageName" $packageName
     }
 
     if (-Not [string]::IsNullOrEmpty($env:VERSION)) {
@@ -132,7 +132,7 @@ steps:
           -XPath "/ImportExportXml/SolutionManifest/Version" `
         ).Node.InnerText
       }
-      Set-PipelineVariable "version", $version
+      Set-PipelineVariable "version" $version
     }
   name: 'ReadSolutionJson'
   env:
