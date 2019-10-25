@@ -14,8 +14,8 @@ parameters:
     artifactName: 'packed-solution' #'$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
     # Alternatively, can deploy from a package feed
     # feed: ''
-    # name: $[ dependencies.Publish.outputs['ReadSolutionJson.solution.name'] ]
-    # package: $[ dependencies.Publish.outputs['ReadSolutionJson.package.name'] ]
+    # name: $[ dependencies.Build.outputs['ReadSolutionJson.solution.name'] ]
+    # package: $[ dependencies.Build.outputs['ReadSolutionJson.package.name'] ]
   toolset: 'powershell'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
