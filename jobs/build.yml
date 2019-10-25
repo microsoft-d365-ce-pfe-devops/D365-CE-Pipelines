@@ -30,6 +30,10 @@ jobs:
       attributes:
       - 'name'
       - 'contentsPath'
+      outputs:
+      - 'name'
+      - 'packageName'
+      - 'feed'
       solutionJsonPath: ${{ parameters.solutionJsonPath }}
       toolset: ${{ parameters.toolset }}
   

@@ -6,6 +6,13 @@ parameters:
   - 'packageDescription'
   - 'packageName'
   - 'version'
+  outputs:
+    # Set this variable to be available in future jobs
+  # - 'contentsPath'
+  # - 'name'
+  # - 'packageDescription'
+  # - 'packageName'
+  # - 'version'
   variableNameMapping:
     # Usage:
     # attributeName: variableName
@@ -24,58 +31,48 @@ parameters:
 steps:
 - pwsh: |
     $attributes = $env:ATTRIBUTES.Split(",")
-    $defaults = @(
-      @{
-        environmentValue = $env:CONTENTS_PATH
-        attributeName = "contentsPath"
-        defaultVariableValue = "solution.contentsPath"
+    $outputs = $env:OUTPUTS.Split(",")
+    $variableNames = @{
+      contentsPath = @{
+        env = $env:CONTENTS_PATH
+        default = "solution.contentsPath"
       }
-      @{
-        environmentValue = $env:NAME
-        attributeName = "name"
-        defaultVariableValue = "solution.name"
+      name = @{
+        env = $env:NAME
+        default = "solution.name"
       }
-      @{
-        environmentValue = $env:PACKAGE_DESCRIPTION
-        attributeName = "packageDescription"
-        defaultVariableValue = "package.description"
+      packageDescription = @{
+        env = $env:PACKAGE_DESCRIPTION
+        default = "package.description"
       }
-      @{
-        environmentValue = $env:PACKAGE_NAME
-        attributeName = "packageName"
-        defaultVariableValue = "package.name"
+      packageName = @{
+        env = $env:PACKAGE_NAME
+        default = "package.name"
       }
-      @{
-        environmentValue = $env:VERSION
-        attributeName = "version"
-        defaultVariableValue = "solution.version"
+      version = @{
+        env = $env:VERSION
+        default = "solution.version"
       }
-    )
-
-    $defaults | ForEach-Object {
-      if ($attributes.Contains($_.attributeName)) {
-        if ([string]::IsNullOrEmpty($_.environmentValue)) {
-          $variableValue = $_.defaultVariableValue
-        } else {
-          $variableValue = $_.environmentValue
-        }
-      } else {
-        $variableValue = ""
-      }
-
-      Write-Host "##vso[task.setvariable variable=attributes.$($_.attributeName)]$variableValue"
     }
-  displayName: 'Convert get-solution-info parameters to variables'
-  env:
-    ATTRIBUTES: ${{ join(',', parameters.attributes) }}
 
-    CONTENTS_PATH: ${{ parameters.variableNameMapping.contentsPath }}
-    NAME: ${{ parameters.variableNameMapping.name }}
-    PACKAGE_DESCRIPTION: ${{ parameters.variableNameMapping.packageDescription }}
-    PACKAGE_NAME: ${{ parameters.variableNameMapping.packageName }}
-    VERSION: ${{ parameters.variableNameMapping.version }}
+    function Set-PipelineVariable {
+      param(
+        [string]$attribute,
+        [string]$value
+      )
+      $nameMapping = $variableNames[$attribute]
+      $variableName = `
+        if ([string]::IsNullOrEmpty($nameMapping.env)) {
+          $nameMapping.default
+        } else {
+          $nameMapping.env
+        }
+      Write-Host "##vso[task.setvariable variable=$variableName]$value"
+      if ($outputs -contains $attribute) {
+        Write-Host "##vso[task.setvariable variable=$variableName;isOutput=true]$value"
+      }
+    }
 
-- pwsh: |
     $solution = `
       Get-Content `
         -Raw `
@@ -87,20 +84,20 @@ steps:
     } else {
       $solutionRelativePath = "contents"
     }
-    $solutionJsonFolder = $env:SOLUTION_JSON_PATH -Replace "(.*?[/\\]?)[^/\\]*.json$", "`$1"
-    $contentsPath = "$solutionJsonFolder$solutionRelativePath"
+    $solutionFolder = $env:SOLUTION_JSON_PATH -Replace "(.*?[/\\]?)[^/\\]*.json$", "`$1"
+    $contentsPath = "$solutionFolder$solutionRelativePath"
 
     if (-Not [string]::IsNullOrEmpty($env:CONTENTS_PATH)) {
-      Write-Host "##vso[task.setvariable variable=$env:CONTENTS_PATH]$contentsPath"
+      Set-PipelineVariable "contentsPath", $contentsPath
     }
     
     if (-Not [string]::IsNullOrEmpty($env:NAME)) {
-      Write-Host "##vso[task.setvariable variable=$env:NAME]$($solution.name)"
+      Set-PipelineVariable "name", $solution.name
     }
 
     if (-Not [string]::IsNullOrEmpty($env:PACKAGE_DESCRIPTION)) {
       $description = if ($solution.description -eq $null) { "" } else { $solution.description }
-      Write-Host "##vso[task.setvariable variable=$env:PACKAGE_DESCRIPTION]$description"
+      Set-PipelineVariable "packageDescription", $description
     }
 
     if (-Not [string]::IsNullOrEmpty($env:PACKAGE_NAME)) {
@@ -109,7 +106,7 @@ steps:
       } else {
         $packageName = $solution.packageName
       }
-      Write-Host "##vso[task.setvariable variable=$env:PACKAGE_NAME]$packageName"
+      Set-PipelineVariable "packageName", $packageName
     }
 
     if (-Not [string]::IsNullOrEmpty($env:VERSION)) {
@@ -122,21 +119,23 @@ steps:
         $version = $solution.version
       } else {
         Expand-Archive `
-          -Path "$solutionJsonFolder$($solution.name).zip" `
+          -Path "$solutionFolder$($solution.name).zip" `
           -DestinationPath "$contentsPath"
         $version = (Select-Xml `
           -Path "$contentsPath\solution.xml" `
           -XPath "/ImportExportXml/SolutionManifest/Version" `
         ).Node.InnerText
       }
-      Write-Host "##vso[task.setvariable variable=$env:VERSION]$version"
+      Set-PipelineVariable "version", $version
     }
   name: 'ReadSolutionJson'
   env:
+    ATTRIBUTES: ${{ join(',', parameters.attributes) }}
+    OUTPUTS: ${{ parameters.outputs }}
     SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
 
-    CONTENTS_PATH: $(attributes.contentsPath)
-    NAME: $(attributes.name)
-    PACKAGE_DESCRIPTION: $(attributes.packageDescription)
-    PACKAGE_NAME: $(attributes.packageName)
-    VERSION: $(attributes.version)
+    CONTENTS_PATH: ${{ parameters.variableNameMapping.contentsPath }}
+    NAME: ${{ parameters.variableNameMapping.name }}
+    PACKAGE_DESCRIPTION: ${{ parameters.variableNameMapping.packageDescription }}
+    PACKAGE_NAME: ${{ parameters.variableNameMapping.packageName }}
+    VERSION: ${{ parameters.variableNameMapping.version }}

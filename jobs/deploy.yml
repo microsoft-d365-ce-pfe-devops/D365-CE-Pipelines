@@ -3,10 +3,17 @@ parameters:
   jobProperties:
     dependsOn: 'Build'
     condition: 'succeeded(''Build'')'
+    # Use these to deploy from a package feed
+    # dependsOn: 'Publish'
+    # condition: 'succeeded(''Publish'')'
   powerAppsEnvironment:
     connectionString: '$(environment.connectionString)'
     serviceConnection: '$(environment.serviceConnection)'
-  solutionZipPath: '$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
+  solution:
+    artifactName: 'packed-solution' #'$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
+    # Alternatively, can deploy from a package feed
+    # feed: ''
+    # package: '$[ dependencies.Publish.outputs[''package.name''] ]'
   toolset: 'powershell'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
 
@@ -27,16 +34,33 @@ jobs:
   strategy:
     runOnce:
       deploy:
+        variables:
+          ${{ if ne(parameters.solution.artifactName, '') }}:
+            solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.artifactName }}
+          ${{ if eq(parameters.solution.artifactName, '') }}:
+            solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}
         steps:
-        - template: ../steps/get-solution-info.yml
-          parameters:
-            attributes:
-            - 'name'
-            solutionJsonPath: '$(Pipeline.Workspace)\packed-solution\solution.json'
+
+        - ${{ if ne(parameters.solution.artifactName, '') }}:
+          - template: ../steps/get-solution-info.yml
+            parameters:
+              attributes:
+              - 'name'
+              solutionJsonPath: '$(solution.folder)\solution.json'
+        
+        - ${{ if eq(parameters.solution.artifactName, '') }}:
+          - task: UniversalPackage
+            inputs:
+              command: 'download'
+              downloadDirectory: '$(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}'
+              feedsToUse: 'internal'
+              vstsFeed: ${{ parameters.solution.feed }}
+              vstsFeedPackage: ${{ parameters.solution.package }}
+              vstsPackageVersion: '*'
 
         - template: ../steps/import-solution.yml
           parameters:
             powerAppsEnvironment: ${{ parameters.environmentDetails }}
-            solutionZipPath: ${{ parameters.solutionZipPath }}
+            solutionZipPath: '$(solution.folder)\$(solution.name)_managed.zip'
             toolset: ${{ parameters.toolset }}
             toolsDirectory: ${{ parameters.toolsDirectory }}
