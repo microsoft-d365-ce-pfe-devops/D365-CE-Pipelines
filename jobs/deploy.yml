@@ -27,18 +27,22 @@ jobs:
   ${{ if eq(parameters.jobProperties.environment, '') }}:
     environment: ${{ parameters.environment }}
 
+  variables:
+    ${{ if eq(parameters.jobProperties.variables.solution.folder, '') }}:
+      ${{ if ne(parameters.solution.artifactName, '') }}:
+        solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.artifactName }}
+      ${{ if eq(parameters.solution.artifactName, '') }}:
+        solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}
+    ${{ each variable in parameters.jobProperties.variables }}:
+      ${{ variable.key }}: ${{ variable.value }}
+
   ${{ each pair in parameters.jobProperties }}:
-    ${{ if not(in(pair.key, 'name', 'pool')) }}:
+    ${{ if not(in(pair.key, 'name', 'pool', 'variables' )) }}:
       ${{ pair.key }}: ${{ pair.value }}
 
   strategy:
     runOnce:
       deploy:
-        variables:
-          ${{ if ne(parameters.solution.artifactName, '') }}:
-            solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.artifactName }}
-          ${{ if eq(parameters.solution.artifactName, '') }}:
-            solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}
         steps:
 
         - ${{ if ne(parameters.solution.artifactName, '') }}:
