@@ -34,7 +34,7 @@ jobs:
       ${{ if eq(parameters.solution.artifactName, '') }}:
         solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}
     ${{ if eq(parameters.jobProperties.variables.package.name, '') }}:
-      package.name: ${{ parameters.package }}
+      package.name: ${{ parameters.solution.package }}
     ${{ each variable in parameters.jobProperties.variables }}:
       ${{ variable.key }}: ${{ variable.value }}
 
