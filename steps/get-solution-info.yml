@@ -60,13 +60,19 @@ steps:
         [string]$attribute,
         [string]$value
       )
+      Write-Host "Called Set-PipelineVariable `"$attribute`", `"$value`""
+
       $nameMapping = $variableNames[$attribute]
+      Write-Host "`$nameMapping = $($nameMapping | ConvertTo-Json)"
+
       $variableName = `
         if ([string]::IsNullOrEmpty($nameMapping.env)) {
           $nameMapping.default
         } else {
           $nameMapping.env
         }
+      Write-Host "`$variableName = $variableName"
+      
       Write-Host "##vso[task.setvariable variable=$variableName]$value"
       if ($outputs -contains $attribute) {
         Write-Host "##vso[task.setvariable variable=$variableName;isOutput=true]$value"
