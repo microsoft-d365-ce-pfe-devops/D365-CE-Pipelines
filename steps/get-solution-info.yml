@@ -131,7 +131,7 @@ steps:
   name: 'ReadSolutionJson'
   env:
     ATTRIBUTES: ${{ join(',', parameters.attributes) }}
-    OUTPUTS: ${{ parameters.outputs }}
+    OUTPUTS: ${{ join(',', parameters.outputs) }}
     SOLUTION_JSON_PATH: ${{ parameters.solutionJsonPath }}
 
     CONTENTS_PATH: ${{ parameters.variableNameMapping.contentsPath }}
