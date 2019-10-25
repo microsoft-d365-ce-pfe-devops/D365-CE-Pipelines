@@ -14,6 +14,7 @@ parameters:
     artifactName: 'packed-solution' #'$(Pipeline.Workspace)\packed-solution\$(solution.name)_managed.zip'
     # Alternatively, can deploy from a package feed
     # feed: ''
+    # name: $[ dependencies.Publish.outputs['ReadSolutionJson.solution.name'] ]
     # package: $[ dependencies.Publish.outputs['ReadSolutionJson.package.name'] ]
   toolset: 'powershell'
   toolsDirectory: '$(Pipeline.Workspace)\tools'
@@ -36,6 +37,8 @@ jobs:
         solution.folder: $(Pipeline.Workspace)\${{ parameters.solution.feed }}\${{ parameters.solution.package }}
     ${{ if eq(parameters.jobProperties.variables.package.name, '') }}:
       package.name: ${{ parameters.solution.package }}
+    ${{ if eq(parameters.jobProperties.variables.solution.name, '') }}:
+      solution.name: ${{ parameters.solution.name }}
     ${{ each variable in parameters.jobProperties.variables }}:
       ${{ variable.key }}: ${{ variable.value }}
 
