@@ -7,7 +7,7 @@ steps:
     $packages = `
       Get-Content `
         -Raw `
-        -Path $env:PACKAGES_JSON_PATH
+        -Path $env:PACKAGES_JSON_PATH `
       | ConvertFrom-Json
     
     Write-Host ($packages | Convert-String)
