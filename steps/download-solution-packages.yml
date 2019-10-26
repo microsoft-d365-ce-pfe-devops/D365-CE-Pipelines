@@ -1,7 +1,16 @@
 parameters:
   feed: '$(feed)'
-  solutionsJsonPath: 'solutions.json'
+  packagesJsonPath: 'packages.json'
 
 steps:
 - pwsh: |
-    Write-Host "Test"
+    $packages = `
+      Get-Content `
+        -Raw `
+        -Path $env:PACKAGES_JSON_PATH
+      | ConvertFrom-Json
+    
+    Write-Host ($packages | Convert-String)
+  name: "DownloadPackages"
+  env:
+    PACKAGES_JSON_PATH: ${{ parameters.packagesJsonPath }}
