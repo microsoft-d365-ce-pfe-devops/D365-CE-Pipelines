@@ -1,0 +1,7 @@
+parameters:
+  feed: '$(feed)'
+  solutionsJsonPath: 'solutions.json'
+
+steps:
+- pwsh: |
+    Write-Host "Test"
