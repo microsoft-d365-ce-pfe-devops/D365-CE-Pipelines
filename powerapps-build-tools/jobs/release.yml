@@ -6,11 +6,8 @@ parameters:
   pipelineEnvironment: '' 
   powerAppsEnvironment: '' # PowerApps Service Connection
   solutionName: ''
-  convertToManaged: false
-  overwriteUnmanagedCustomizations: true
-  holdingSolution: false
-  skipProductUpdateDependencies: true
-  publishWorkflows: true
+  AsyncOperation: true
+  MaxAsyncWaitTime: '240'
 
 jobs:
 
@@ -35,8 +32,5 @@ jobs:
               inputs:
                 PowerAppsEnvironment: '${{ parameters.powerAppsEnvironment }}'
                 SolutionInputFile: '$(Pipeline.Workspace)\solution-artifact\${{ parameters.solutionName }}_managed.zip'
-                ConvertToManaged: ${{ parameters.convertToManaged }}
-                OverwriteUnmanagedCustomizations: ${{ parameters.overwriteUnmanagedCustomizations }}
-                HoldingSolution: ${{ parameters.holdingSolution }}
-                SkipProductUpdateDependencies: ${{ parameters.skipProductUpdateDependencies }}
-                PublishWorkflows: ${{ parameters.publishWorkflows }}
+                AsyncOperation: ${{ parameters.AsyncOperation }}
+                MaxAsyncWaitTime: ${{ parameters.MaxAsyncWaitTime }}
